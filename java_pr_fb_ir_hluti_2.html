@@ -104,7 +104,7 @@
           </a>
         </nav>
         <div class="flex items-center gap-1.5">
-          <button id="open-trivia-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition inline-flex items-center gap-1" title="Stutt kaffipása með léttum spurningum">
+          <button id="open-trivia-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition inline-flex items-center gap-1" title="Kaffipása: Léttar spurningar úr dægurmenningu, íþróttum og fleiru">
             <span>☕</span>
             <span>Kaffipása</span>
           </button>
@@ -7252,8 +7252,8 @@ System.out.println(tel);`,
           <div class="flex items-start gap-2.5 min-w-0">
             <span class="text-lg shrink-0">☕</span>
             <div>
-              <div class="text-sm font-bold text-amber-900">Kaffipása! (${state.completedQuestions.size} spurningar leystar)</div>
-              <p class="text-xs text-amber-800 mt-0.5">Viltu taka eina létta spurningu um fótbolta, körfubolta eða bíómyndir áður en þú heldur áfram?</p>
+              <div class="text-sm font-bold text-amber-900">Viltu skella þér í stutta kaffipásu? (${state.completedQuestions.size} spurningar leystar)</div>
+              <p class="text-xs text-amber-800 mt-0.5">Léttar spurningar úr dægurmenningu, íþróttum og fleiru — taktu eina létta pásu áður en þú heldur áfram með kóðann.</p>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0 ml-auto">
@@ -7824,7 +7824,9 @@ for (int r = 0; r < m.length; r++) {
         return {
           triviaAnswered: Number(d.triviaAnswered) || 0,
           triviaCorrect: Number(d.triviaCorrect) || 0,
-          bestBugHuntScore: Number(d.bestBugHuntScore) || 0
+          bestBugHuntScore: Number(d.bestBugHuntScore) || 0,
+          triviaQueue: Array.isArray(d.triviaQueue) ? d.triviaQueue.filter(n => Number.isInteger(n) && n >= 0 && n < 32) : [],
+          lastTriviaIdx: Number.isInteger(d.lastTriviaIdx) ? d.lastTriviaIdx : -1
         };
       } catch (e) {
         return { triviaAnswered: 0, triviaCorrect: 0, bestBugHuntScore: 0 };
@@ -7838,200 +7840,393 @@ for (int r = 0; r < m.length; r++) {
     }
 
     const TRIVIA_CARDS = [
-      // Fótbolti (6 Trivial Pursuit fun facts)
+      // Íslensk dægurmenning (8 spurningar)
       {
-        category: 'Fótbolti',
-        question: 'Ken Aston, breskur dómari, fann upp gula og rauða spjaldið fyrir HM 1970. Hvaðan fékk hann hugmyndina að litunum tveimur?',
+        category: 'Íslensk menning',
+        question: 'Hvaða íslenska hljómsveit gerði lagið „Hoppípolla“ frægt um allan heim?',
         options: [
-          'Úr umferðarljósum á meðan hann sat fastur í umferð í London',
-          'Úr litum enska fánans og konungsfjölskyldunnar',
-          'Úr spilastokki sem hann notaði í frístundum',
-          'Úr litum á búningum dómara á þeim tíma'
+          'Kaleo',
+          'Sigur Rós',
+          'Of Monsters and Men',
+          'Hatari'
         ],
-        correct: 0,
-        fact: 'Eftir tungumálaörðugleika á HM 1966 sat Aston við umferðarljós á Kensington High Street og áttaði sig á að gult (varúð) og rautt (stopp) skildust á öllum tungumálum!'
+        correct: 1,
+        fact: '„Hoppípolla“ kom út á plötunni Takk... árið 2005 og heyrðist víða í kvikmyndum, sjónvarpi og auglýsingum erlendis.'
       },
       {
-        category: 'Fótbolti',
-        question: 'Upprunalega HM-styttunni (Jules Rimet bikarnum) var stolið af sýningu í London skömmu fyrir HM 1966. Hver fann bikarinn viku síðar?',
+        category: 'Íslensk menning',
+        question: 'Hvaða kvikmynd eftir Baltasar Kormák gerist á íslenskum togara og byggir á sönnum atburðum frá 1984?',
         options: [
-          'Hundur að nafni Pickles sem var úti að ganga með eiganda sínum og fann hann vafinn í dagblað undir runna',
-          'Rannsóknarlögreglumaður sem fann hann í ferðatösku á Heathrow-flugvelli',
-          'Sjómaður sem fann hann fljótandi í ánni Thames',
-          'Leikmaður enska landsliðsins fann hann í búningsklefa á Wembley'
+          'Djúpið',
+          '101 Reykjavík',
+          'Englar alheimsins',
+          'Kontórinn'
         ],
         correct: 0,
-        fact: 'Pickles varð þjóðhetja í Englandi fyrir vikið og fékk meira að segja að mæta í sigurveislu enska landsliðsins eftir úrslitaleikinn!'
+        fact: 'Djúpið (2012) segir sögu Guðlaugs Friðþórssonar sem synti í land eftir sjóslys við Vestmannaeyjar og hlaut mikið lof.'
       },
       {
-        category: 'Fótbolti',
-        question: 'Áður en vítaspyrnukeppni var tekin upp í stórmótum (eins og á EM 1968), hvernig var skorið úr um sigurvegara þegar leikur endaði með jafntefli eftir framlengingu?',
+        category: 'Íslensk menning',
+        question: 'Í hvaða þekktu íslensku kvikmynd eftir Friðrik Þór Friðriksson er aðalpersónan Páll búandi á Kleppi og með mikla ástríðu fyrir tónlist og ljóðum?',
         options: [
-          'Með hlutkesti (kastað upp peningi) í búningsklefanum',
-          'Sá sem fékk færri hornspyrnur vann',
-          'Dómarinn valdi það lið sem spilaði fallegri fótbolta',
-          'Liðin spiluðu strax nýjan 90 mínútna leik samdægurs'
+          'Börn náttúrunnar',
+          'Englar alheimsins',
+          'Nói albínói',
+          'Reykjavík Rotterdam'
         ],
-        correct: 0,
-        fact: 'Ítalía komst einmitt í úrslitaleik EM 1968 eftir að fyrirliði þeirra giskaði rétt á peningakast gegn Sovétríkjunum!'
+        correct: 1,
+        fact: 'Englar alheimsins (2000) byggir á skáldsögu Einars Más Guðmundssonar og er ein þekktasta íslenska kvikmyndin.'
       },
       {
-        category: 'Fótbolti',
-        question: 'Hver er eini markvörðurinn í sögu fótboltans sem hefur unnið Gullboltann (Ballon d\'Or)?',
+        category: 'Íslensk menning',
+        question: 'Hvaða íslensk tónlistarkona sló í gegn á alþjóðavísu með laginu „Jungle“ og plötunni Post á tíunda áratugnum?',
         options: [
-          'Lev Yashin (Sovétríkin)',
-          'Gianluigi Buffon (Ítalía)',
-          'Manuel Neuer (Þýskaland)',
-          'Iker Casillas (Spánn)'
+          'Emilíana Torrini',
+          'Björk',
+          'Laufey',
+          'Guðrún Gunnarsdóttir'
         ],
-        correct: 0,
-        fact: 'Lev Yashin („Svarti köngulóin“) vann Ballon d\'Or árið 1963 og er enn í dag eini markvörðurinn sem hefur hreppt verðlaunin.'
+        correct: 1,
+        fact: 'Björk átti gríðarleg áhrif á alþjóðlega tónlistarmenningu á 10. áratugnum með sérstökum stíl og raddbeitingu.'
       },
       {
-        category: 'Fótbolti',
-        question: 'Í frægum bikarleik á Madagaskar árið 2002 (AS Adema gegn SO l\'Emyrne) endaði leikurinn 149–0. Hvers vegna skoruðu leikmenn tapliðsins 149 sjálfsmörk viljandi?',
+        category: 'Íslensk menning',
+        question: 'Hvaða þekkti íslenski sjónvarps- og grínþáttur hóf göngu sína á Stöð 2 og skóp persónur eins og Steinda Jr. og Fóstbræður-kynslóðina?',
         options: [
-          'Í mótmælaskyni við dómgæslu í leiknum á undan sem kostaði þá meistaratitilinn',
-          'Vegna þess að markatala réði því hvort liðið kæmist á HM',
-          'Vegna þess að markvörðurinn þeirra meiddist í upphitun',
-          'Vegna þess að liðin höfðu veðjað um hver gæti skorað flest mörk á 10 mínútum'
+          'Hér og nú',
+          'Fóstbræður',
+          'Vaktin',
+          'Áramótaskaupið'
         ],
-        correct: 0,
-        fact: 'Leikmenn SO l\'Emyrne byrjuðu á miðju og sparkuðu boltanum beint í eigið mark aftur og aftur allan leikinn á meðan andstæðingarnir stóðu bara og horfðu á!'
+        correct: 1,
+        fact: 'Fóstbræður voru vinsælir sketsaþættir á íslensku sjónvarpi þar sem margar ógleymanlegar persónur urðu til.'
       },
       {
-        category: 'Fótbolti',
-        question: 'Hvaða regla í fótbolta var innleidd árið 1992 eftir að lið á HM 1990 notuðu hana óspart til að tefja tímann?',
+        category: 'Íslensk menning',
+        question: 'Hvaða ung íslensk tónlistarkona hefur á síðustu árum vakið mikla athygli víða um heim fyrir að blanda saman djassi og poppi?',
         options: [
-          'Bannið við því að markvörður taki boltann upp í hendurnar eftir viljandi sendingu frá samherja (back-pass reglan)',
-          'Rangstöðureglan',
-          'Að dómari megi gefa rautt spjald fyrir tæklingu aftan frá',
-          'Að skipta megi inn 3 varamönnum'
+          'Laufey',
+          'Glowie',
+          'Bríet',
+          'Svala'
         ],
         correct: 0,
-        fact: 'Fyrir 1992 gátu varnarmenn endalaust sent boltann til baka á markvörðinn sem greip hann og hélt honum í 6 sekúndur. Reglan gjörbreytti hraða leiksins!'
-      },
-      // Körfubolti (6 Trivial Pursuit fun facts)
-      {
-        category: 'Körfubolti',
-        question: 'Þegar James Naismith fann upp körfubolta árið 1891 notaði hann alvöru ferskjukörfur (peach baskets) sem körfur. Hvað var mest pirrandi við fyrstu leikina?',
-        options: [
-          'Körfurnar voru með lokuðum botni svo einhver þurfti alltaf að klifra upp stiga til að ná boltanum niður eftir hverja körfu',
-          'Körfurnar voru fullar af vatni svo boltinn blotnaði alltaf',
-          'Körfurnar voru festar á hjól og færðust til',
-          'Körfurnar voru minni en boltinn svo hann festist alltaf'
-        ],
-        correct: 0,
-        fact: 'Það liðu nokkur ár áður en einhver fékk þá snjöllu hugmynd að saga botninn úr körfunum svo boltinn dytti bara í gegn!'
+        fact: 'Laufey Lín Jónsdóttir hefur náð miklum vinsældum erlendis með nútímalegri nálgun á djass og popptónlist.'
       },
       {
-        category: 'Körfubolti',
-        question: 'Áður en sérstakur körfubolti var hannaður árið 1894, hvaða bolta notuðu menn í allra fyrstu körfuboltaleikjunum?',
+        category: 'Íslensk menning',
+        question: 'Hvað kallast hinn árlegi tónlistar- og menningarhátíðarviðburður í miðbæ Reykjavíkur sem haldinn hefur verið á haustin síðan 1999?',
         options: [
-          'Venjulegan fótbolta',
-          'Keilu-kúlu úr tré',
-          'Tennisbolta',
-          'Handbolta úr leðri'
+          'Þjóðhátíð',
+          'Iceland Airwaves',
+          'LungA',
+          'Aldrei fór ég suður'
         ],
-        correct: 0,
-        fact: 'Árið 1891 var enginn körfubolti til, svo Naismith notaði einfaldlega fótbolta og tvær ferskjukörfur í íþróttahúsi í Springfield, Massachusetts.'
+        correct: 1,
+        fact: 'Iceland Airwaves hefur verið fastur liður í tónlistarlífi Reykjavíkur í áratugi og dregið að sér bæði innlenda og erlenda listamenn.'
       },
       {
-        category: 'Körfubolti',
-        question: 'Hvaða NBA-goðsögn er skuggamyndin (silhouette) í opinbera NBA-merkinu byggð á?',
+        category: 'Íslensk menning',
+        question: 'Hvaða íslenska hljómsveit sló í gegn erlendis með laginu „Little Talks“ í byrjun annars áratugar 21. aldar?',
         options: [
-          'Jerry West',
-          'Michael Jordan',
-          'Magic Johnson',
-          'Kareem Abdul-Jabbar'
+          'GusGus',
+          'Of Monsters and Men',
+          'Mezzoforte',
+          'Quarashi'
         ],
-        correct: 0,
-        fact: 'Hönnuðurinn Alan Siegel byggði NBA-merkið árið 1969 á ljósmynd af Jerry West (Los Angeles Lakers) að rekja boltann — þó NBA hafi lengi neitað að staðfesta það opinberlega!'
+        correct: 1,
+        fact: '„Little Talks“ (2011) varð gríðarlega vinsælt lag víða um heim, meðal annars í Bandaríkjunum og víðar í Evrópu.'
+      },
+      // Bandarísk dægurmenning (8 spurningar)
+      {
+        category: 'Bandarísk menning',
+        question: 'Hvaða teiknimyndaþáttaröð eftir Matt Groening hefur verið í loftinu í bandarísku sjónvarpi í yfir þrjá áratugi og gerist í bænum Springfield?',
+        options: [
+          'Family Guy',
+          'The Simpsons',
+          'South Park',
+          'Futurama'
+        ],
+        correct: 1,
+        fact: 'The Simpsons hófu göngu sína árið 1989 og eru lengst sýndu bandarísku teiknimyndaþættirnir í sögunni.'
       },
       {
-        category: 'Körfubolti',
-        question: 'Áður en 24-sekúndna skotklukkan (shot clock) var tekin upp í NBA árið 1954 endaði einn leikur (Fort Wayne Pistons gegn Minneapolis Lakers) með ótrúlega lágum stigum. Hver urðu lokatölurnar?',
+        category: 'Bandarísk menning',
+        question: 'Í bandarísku sjónvarpsþáttunum Friends, hvað heitir kaffihúsið þar sem vinahópurinn heldur sig oftast?',
         options: [
-          '19–18',
-          '44–42',
-          '31–29',
-          '12–10'
+          'Monk\'s Café',
+          'Central Perk',
+          'The Peach Pit',
+          'MacLaren\'s'
         ],
-        correct: 0,
-        fact: 'Án skotklukku gat lið sem var yfir einfaldlega haldið boltanum og sent hann sín á milli í margar mínútur án þess að skjóta! 24-sekúndna klukkan bjargaði NBA.'
+        correct: 1,
+        fact: 'Central Perk er eitt frægasta kaffihús sjónvarpssögunnar og táknrænn samkomustaður í Friends.'
       },
       {
-        category: 'Körfubolti',
-        question: 'Þriggja stiga línan var ekki upprunalega í NBA, heldur var hún gerð vinsæl í samkeppnisdeildinni ABA á 7. og 8. áratugnum. Hvenær tók NBA loksins upp 3-stiga línuna?',
+        category: 'Bandarísk menning',
+        question: 'Hvaða bandaríska kvikmynd frá 1994 segir sögu Forrest Gump sem fléttast inn í marga sögulega atburði í Bandaríkjunum?',
         options: [
-          'Árið 1979 (fyrir tímabilið 1979–80, sama ár og Magic Johnson og Larry Bird komu inn í deildina)',
-          'Árið 1950',
-          'Árið 1992 með Dream Team',
-          'Árið 1965'
+          'Pulp Fiction',
+          'Forrest Gump',
+          'The Shawshank Redemption',
+          'Goodfellas'
         ],
-        correct: 0,
-        fact: 'Í upphafi litu margir NBA-þjálfarar á 3-stiga skotið sem „brellu“, en í dag er það orðið mikilvægasta vopnið í leiknum!'
+        correct: 1,
+        fact: 'Forrest Gump vann til sex Óskarsverðlauna, þar á meðal fyrir bestu mynd og besta leikara í aðalhlutverki (Tom Hanks).'
       },
       {
-        category: 'Körfubolti',
-        question: 'Wilt Chamberlain skoraði eins og frægt er 100 stig í einum NBA-leik árið 1962. Hvað er sérstakt við upptökur frá þessum sögulega leik?',
+        category: 'Bandarísk menning',
+        question: 'Hvaða streymisþjónusta gerði þætti á borð við Stranger Things og The Crown að alþjóðlegum sjónvarpsviðburðum?',
         options: [
-          'Engin sjónvarpsupptaka er til af leiknum — aðeins útvarpslýsing frá 4. leikhluta og ein fræg ljósmynd af honum með blað sem stendur „100“ á',
-          'Leikurinn var sýndur í beinni um allan heim í lit',
-          'Hann skoraði öll 100 stigin með 3-stiga skotum',
-          'Leikurinn fór í fjórfalda framlengingu'
+          'Hulu',
+          'Netflix',
+          'Peacock',
+          'Paramount+'
         ],
-        correct: 0,
-        fact: 'Leikurinn fór fram í Hershey í Pennsylvaníu fyrir framan um 4.000 áhorfendur og var ekki í sjónvarpi, sem gerir hann enn goðsagnakenndari!'
-      },
-      // Kvikmyndir (4 léttar & skemmtilegar fun facts)
-      {
-        category: 'Kvikmyndir',
-        question: 'Í vísindaskáldsögumyndinni The Matrix (1999) sjást grænu táknin renna niður skjáinn. Hvaðan komu táknin í raun og veru?',
-        options: [
-          'Hönnuðurinn skannaði japanskar sushi-uppskriftir úr matreiðslubók konunnar sinnar og speglaði þær',
-          'Þetta var alvöru Java-kóði úr stýrikerfi NASA',
-          'Þetta voru handahófskenndar stærðfræðiformúlur eftir Einstein',
-          'Þetta var dulmál sem leikstjórarnir bjuggu til á 10 árum'
-        ],
-        correct: 0,
-        fact: 'Simon Whiteley hannaði „Matrix-kóðann“ einfaldlega með því að skanna japanska stafi úr sushi-bók og snúa þeim við!'
+        correct: 1,
+        fact: 'Netflix hefur haft mikil áhrif á hvernig fólk horfir á sjónvarpsþætti og kvikmyndir um allan heim.'
       },
       {
-        category: 'Kvikmyndir',
-        question: 'Hvaða fræga kvikmynd átti upprunalega að heita „Spaceman from Pluto“ samkvæmt tillögu frá yfirmanni hjá kvikmyndaverinu sem fannst upprunalegi titillinn of skrýtinn?',
+        category: 'Bandarísk menning',
+        question: 'Hvaða bandaríska tónlistarkona gaf út plöturnar 1989, folklore og Midnights og hefur verið ein mest selda tónlistarkona heims á 21. öldinni?',
         options: [
-          'Back to the Future',
-          'Star Wars',
-          'E.T.',
-          'Toy Story'
+          'Billie Eilish',
+          'Taylor Swift',
+          'Ariana Grande',
+          'Olivia Rodrigo'
         ],
-        correct: 0,
-        fact: 'Sid Sheinberg hjá Universal sendi bréf og stakk upp á „Spaceman from Pluto“, en Steven Spielberg svaraði kurteislega með því að þakka honum fyrir „frábæra brandarann“ svo hætt var við breytinguna!'
+        correct: 1,
+        fact: 'Taylor Swift hefur átt gríðarlega sigurgöngu í popp- og kántrítónlist í yfir fimmtán ár.'
       },
       {
-        category: 'Kvikmyndir',
-        question: 'Í myndinni Jurassic Park (1993) bjuggu hljóðhönnuðir til hið fræga öskur í risaeðlunni Tyrannosaurus rex með því að blanda saman dýrahljóðum. Hvaða óvænta dýr var í aðalhlutverki í því hljóði?',
+        category: 'Bandarísk menning',
+        question: 'Hvaða bandaríska sjónvarpsþáttaröð gerist í ímynduðu konungsríki í Westeros og varð einn umtalaðasti þáttur 2. áratugarins?',
         options: [
-          'Fílsungi (ásamt tígrisdýri og krókódíl)',
-          'Mörgæs',
-          'Gullfiskur',
-          'Hestur'
+          'The Witcher',
+          'Game of Thrones',
+          'Vikings',
+          'Westworld'
         ],
-        correct: 0,
-        fact: 'Aðalhljóðið í öskri T-Rex var tekið upp af litlum fílsunga, og síðan blandað við urr í krókódíl og tígrisdýri til að gera það ógnvekjandi!'
+        correct: 1,
+        fact: 'Game of Thrones var sýndur á HBO frá 2011 til 2019 og fékk fjölda Emmy-verðlauna.'
       },
       {
-        category: 'Kvikmyndir',
-        question: 'Hvaða kvikmynd er fyrsta tölvuteiknaða kvikmyndin í fullri lengd (gefin út árið 1995)?',
+        category: 'Bandarísk menning',
+        question: 'Hvaða bandaríska kvikmyndastúdíó stendur á bak við myndir á borð við Toy Story, Up og Inside Out?',
         options: [
-          'Toy Story',
-          'Shrek',
-          'Finding Nemo',
-          'The Lion King'
+          'DreamWorks',
+          'Pixar',
+          'Illumination',
+          'Laika'
+        ],
+        correct: 1,
+        fact: 'Pixar hefur lengi verið þekkt fyrir hugljúfar tölvuteiknaðar myndir sem höfða bæði til barna og fullorðinna.'
+      },
+      {
+        category: 'Bandarísk menning',
+        question: 'Hvaða árlegur viðburður í bandarískri menningu sameinar úrslitaleikinn í ruðningi (NFL) og eina dýrustu auglýsinga- og tónlistardagskrá ársins?',
+        options: [
+          'March Madness',
+          'Super Bowl',
+          'Ryder Cup',
+          'Kentucky Derby'
+        ],
+        correct: 1,
+        fact: 'Super Bowl er mun meira en bara íþróttaleikur í Bandaríkjunum — hálfleikssýningin og auglýsingarnar eru stór menningarviðburður.'
+      },
+      // Fjölbreyttar íþróttir (8 spurningar)
+      {
+        category: 'Íþróttir',
+        question: 'Í tennis, hvað kallast það þegar staðan í lotu er 40–40?',
+        options: [
+          'Match point',
+          'Deuce',
+          'Ace',
+          'Break'
+        ],
+        correct: 1,
+        fact: 'Þegar báðir leikmenn eru komnir á 40 kallast staðan „deuce“ og annar þarf að vinna tvo bolta í röð til að klára lotuna.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Í golfi, hvað kallast það þegar kylfingur fer holuna á einu höggi undir pari?',
+        options: [
+          'Eagle',
+          'Birdie',
+          'Bogey',
+          'Albatross'
+        ],
+        correct: 1,
+        fact: '„Birdie“ er eitt högg undir pari, „eagle“ er tvö högg undir pari og „bogey“ er eitt högg yfir pari.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Hvaða íþrótt er spiluð á ís þar sem lið renna þungum granítsteinum í átt að skotmarki og sópa ísinn á undan steininum?',
+        options: [
+          'Íshokkí',
+          'Krulla (Curling)',
+          'Skautahlaup',
+          'Bandý'
+        ],
+        correct: 1,
+        fact: 'Í krullu (curling) nota leikmenn kústana til að hita ísinn örlítið og stýra hraða og sveigju steinsins.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Í Formúlu 1, hvaða flaggi er veifað þegar keppandi er í fyrsta sæti og lýkur lokahring keppninnar?',
+        options: [
+          'Gulu flaggi',
+          'Köflótta flagginu (checkered flag)',
+          'Bláa flaggi',
+          'Rauða flaggi'
+        ],
+        correct: 1,
+        fact: 'Köflótta flaggið er klassískt merki um að keppni (eða tímataka) sé formlega búin.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Hversu löng er hefðbundin maraþonhlaupavegalengd á götuhlaupum og Ólympíuleikum?',
+        options: [
+          '21,1 km',
+          '42,195 km',
+          '50 km',
+          '30 km'
+        ],
+        correct: 1,
+        fact: 'Opinber lengd maraþons er 42,195 kílómetrar (26 mílur og 385 yardar).'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Í frjálsum íþróttum, hvað kallast greinin þar sem keppendur hlaupa áfram og stökkva í þremur samfelldum stökkum (hopp, skref og stökk)?',
+        options: [
+          'Langstökk',
+          'Þrístökk',
+          'Stangarstökk',
+          'Hástökk'
+        ],
+        correct: 1,
+        fact: 'Í þrístökki eru þrjú samfelld stökk tekin áður en lent er í sandgryfjunni.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Hvaða íþróttamóti er oft lýst sem „Tour de France“ í hjólreiðum?',
+        options: [
+          'Frakklandshjólreiðunum (Tour de France)',
+          'Giro d\'Italia',
+          'Vuelta a España',
+          'Paris-Roubaix'
         ],
         correct: 0,
-        fact: 'Toy Story frá Pixar árið 1995 markaði tímamót í kvikmyndasögunni sem fyrsta bíómyndin sem var alfarið gerð í tölvu.'
+        fact: 'Tour de France er þekktasta hjólreiðakeppni heims og fer fram árlega í júlí, aðallega í Frakklandi.'
+      },
+      {
+        category: 'Íþróttir',
+        question: 'Í borðtennis, upp í hversu mörg stig er spilað í venjulegri lotu (þar sem þarf að vinna með tveggja stiga mun)?',
+        options: [
+          '11 stig',
+          '15 stig',
+          '21 stig',
+          '25 stig'
+        ],
+        correct: 0,
+        fact: 'Í nútíma borðtennislotum er spilað upp í 11 stig (og þarf tveggja stiga forskot ef staðan verður 10–10).'
+      },
+      // Skemmtilegar staðreyndir & léttur fróðleikur (8 spurningar)
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða dýr er þekkt fyrir að sofa standandi í stuttum lúrum til að geta flúið rándýr fljótt?',
+        options: [
+          'Kóalabjörn',
+          'Hestur',
+          'Þvottabjörn',
+          'Kengúra'
+        ],
+        correct: 1,
+        fact: 'Hestar geta læst liðum í fótunum og tekið létta blundi standandi, þó þeir þurfi líka að liggja niður fyrir djúpan svefn.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða pláneta í sólkerfinu okkar er þekktust fyrir áberandi hringakerfi úr ís og grjóti?',
+        options: [
+          'Mars',
+          'Satúrnus',
+          'Úranus',
+          'Merkúríus'
+        ],
+        correct: 1,
+        fact: 'Satúrnus er frægur fyrir stóra og glæsilega hringakerfið sitt sem sést vel í stjörnukíkjum.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða málmur er fljótandi við stofuhita?',
+        options: [
+          'Ál',
+          'Kvikasilfur',
+          'Sink',
+          'Kopar'
+        ],
+        correct: 1,
+        fact: 'Kvikasilfur er einn fárra málma sem er fljótandi við venjulegan stofuhita.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvað kallast sú tækni þegar tölvuleikur eða app umbunar notanda með stigum, merkjum eða áföngum til að gera upplifunina skemmtilegri?',
+        options: [
+          'Leikjavæðing (gamification)',
+          'Þjöppun',
+          'Arfleifð',
+          'Staðfærsla'
+        ],
+        correct: 0,
+        fact: 'Leikjavæðing notar leikjaþætti eins og stig, áfanga og smáleiki til að auka áhuga og virkni.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða heimsálfa er bæði heimsálfa og eitt stórt land í senn?',
+        options: [
+          'Suður-Ameríka',
+          'Ástralía',
+          'Afríka',
+          'Suðurskautslandið'
+        ],
+        correct: 1,
+        fact: 'Ástralía er bæði heimsálfa og eitt land, auk þess að tilheyra stærra svæði sem kallast Eyjaálfa (Oceania).'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða tölvuleikjapersóna þarf að forðast draugana Blinky, Pinky, Inky og Clyde í völundarhúsi?',
+        options: [
+          'Mario',
+          'Pac-Man',
+          'Sonic',
+          'Link'
+        ],
+        correct: 1,
+        fact: 'Pac-Man kom út árið 1980 og er einn allra þekktasti spilakassaleikur sögunnar.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvaða tungumál er mest talað sem móðurmál í heiminum samkvæmt flestum málfræðiyfirliti?',
+        options: [
+          'Spænska',
+          'Mandarín-kínverska',
+          'Enska',
+          'Arabíska'
+        ],
+        correct: 1,
+        fact: 'Mandarín-kínverska hefur fleiri móðurmálshafa en nokkurt annað tungumál í heiminum.'
+      },
+      {
+        category: 'Skemmtilegur fróðleikur',
+        question: 'Hvað kallast það þegar vatn breytist beint úr föstu formi (ís) í gas (vatnsgufu) án þess að verða fljótandi á milli?',
+        options: [
+          'Þétting',
+          'Þurrgufun / sublimation',
+          'Bræðsla',
+          'Storknun'
+        ],
+        correct: 1,
+        fact: 'Þurrgufun (sublimation) gerist til dæmis þegar snjór eða ís gufar beint upp í þurru og köldu lofti.'
       }
     ];
 
@@ -8096,8 +8291,27 @@ for (int r = 0; r < m.length; r++) {
       });
     }
 
+    function pickNextTriviaIndex() {
+      const stats = loadFunStats();
+      if (!Array.isArray(stats.triviaQueue) || stats.triviaQueue.length === 0) {
+        const pool = Array.from({ length: TRIVIA_CARDS.length }, (_, i) => i);
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        if (pool.length > 1 && pool[pool.length - 1] === stats.lastTriviaIdx) {
+          [pool[0], pool[pool.length - 1]] = [pool[pool.length - 1], pool[0]];
+        }
+        stats.triviaQueue = pool;
+      }
+      const nextIdx = stats.triviaQueue.pop();
+      stats.lastTriviaIdx = nextIdx;
+      saveFunStats(stats);
+      return nextIdx;
+    }
+
     function openTriviaModal() {
-      currentTriviaIndex = Math.floor(Math.random() * TRIVIA_CARDS.length);
+      currentTriviaIndex = pickNextTriviaIndex();
       renderTriviaCard();
       triviaModal.classList.remove('hidden');
       triviaModal.classList.add('flex');
@@ -8112,7 +8326,7 @@ for (int r = 0; r < m.length; r++) {
     document.getElementById('close-trivia-modal-btn').addEventListener('click', closeTriviaModal);
     document.getElementById('close-trivia-footer-btn').addEventListener('click', closeTriviaModal);
     document.getElementById('next-trivia-btn').addEventListener('click', () => {
-      currentTriviaIndex = (currentTriviaIndex + 1) % TRIVIA_CARDS.length;
+      currentTriviaIndex = pickNextTriviaIndex();
       renderTriviaCard();
     });
     triviaModal.addEventListener('click', (e) => {
