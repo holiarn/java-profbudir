@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Prófbúðir – Forsíða</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter og JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-card {
+      animation: fadeSlideUp 0.28s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- EFSTA STIKA -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-sm">
+            JP
+          </div>
+          <div class="truncate">
+            <h1 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+              Java Prófbúðir
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">
+              Gagnvirkar æfingar fyrir forritunarpróf í Java
+            </p>
+          </div>
+        </div>
+
+        <nav class="inline-flex flex-wrap items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200" aria-label="Aðalvalmynd">
+          <a href="index.html" aria-current="page" class="px-3 py-1 rounded-lg text-xs font-semibold bg-white text-blue-700 shadow-xs transition">
+            Forsíða
+          </a>
+          <a href="java_pr_fb_ir_hluti_1.html" class="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
+            Hluti 1: Grunnur &amp; Lykkjur
+          </a>
+          <a href="java_pr_fb_ir_hluti_2.html" class="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
+            Hluti 2: Aðferðir &amp; Fylki
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- AÐALSVÆÐI -->
+  <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <section class="mb-8 animate-card">
+      <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold mb-3">
+        Velkomin(n) í Java Prófbúðir
+      </span>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        Veldu hluta til að æfa
+      </h2>
+      <p class="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">
+        Þrepaskipt æfingaumhverfi með kennslukortum, vísbendingum, sjálfvirkri kóðayfirferð, smáleiknum <em>Villuveiðar</em> og sjálfvirkri vistun á framvindu í vafranum þínum.
+      </p>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 animate-card">
+      <!-- Kort: Hluti 1 -->
+      <article class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 flex flex-col justify-between hover:border-blue-300 transition">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs">
+                J1
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">Hluti 1: Grunnur &amp; Lykkjur</h3>
+                <p class="text-xs text-slate-500">5 kaflar • 160 spurningar</p>
+              </div>
+            </div>
+            <span id="p1-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+              0 / 160
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-600 leading-relaxed mb-4">
+            Breytur, heiltöludeiling, skilyrðissetningar, strengir (<code class="code-font text-slate-800">String</code>), <code class="code-font text-slate-800">for</code>- og <code class="code-font text-slate-800">while</code>-lykkjur og samsett prófdæmi.
+          </p>
+
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-5">
+            <div id="p1-bar" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <a href="java_pr_fb_ir_hluti_1.html" class="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition text-center shadow-xs">
+          Opna Hluta 1 →
+        </a>
+      </article>
+
+      <!-- Kort: Hluti 2 -->
+      <article class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 flex flex-col justify-between hover:border-blue-300 transition">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs">
+                J2
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">Hluti 2: Aðferðir &amp; Fylki</h3>
+                <p class="text-xs text-slate-500">5 kaflar • Aðferðir, 1D &amp; 2D fylki</p>
+              </div>
+            </div>
+            <span id="p2-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+              0 / 36
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-600 leading-relaxed mb-4">
+            Aðferðir (<code class="code-font text-slate-800">methods</code>), <code class="code-font text-slate-800">return</code> vs. <code class="code-font text-slate-800">void</code>, gildissending, yfirhleðsla, einvíð fylki, leit í fylkjum og tvívíð fylki.
+          </p>
+
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-5">
+            <div id="p2-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <a href="java_pr_fb_ir_hluti_2.html" class="w-full px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition text-center shadow-xs">
+          Opna Hluta 2 →
+        </a>
+      </article>
+    </div>
+  </main>
+
+  <!-- FÓTUR -->
+  <footer class="border-t border-slate-200 bg-white py-4 mt-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <span>Java Prófbúðir • Gagnvirkt náms- og æfingaefni í Java</span>
+      <span>Framvinda vistast sjálfkrafa í vafranum</span>
+    </div>
+  </footer>
+
+  <script>
+    function readSavedDoneCount(storageKey) {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return 0;
+        const data = JSON.parse(raw);
+        if (data && Array.isArray(data.completedQuestions)) {
+          return data.completedQuestions.length;
+        }
+      } catch (e) {}
+      return 0;
+    }
+
+    const p1Done = readSavedDoneCount('java_profbudir_hluti1_progress_v1');
+    const p1Total = 160;
+    document.getElementById('p1-badge').textContent = `${p1Done} / ${p1Total}`;
+    document.getElementById('p1-bar').style.width = `${Math.min(100, Math.round((p1Done / p1Total) * 100))}%`;
+
+    const p2Done = readSavedDoneCount('java_profbudir_hluti2_progress_v1');
+    const p2Total = 36;
+    document.getElementById('p2-badge').textContent = `${p2Done} / ${p2Total}`;
+    document.getElementById('p2-bar').style.width = `${Math.min(100, Math.round((p2Done / p2Total) * 100))}%`;
+  </script>
+</body>
+</html>
