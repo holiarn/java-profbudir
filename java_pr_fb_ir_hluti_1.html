@@ -113,6 +113,10 @@
             <span class="hidden sm:inline">Smáleikur:</span>
             <span>Villuveiðar</span>
           </button>
+          <button id="open-tip-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition inline-flex items-center gap-1" title="Hvatning og prófráð">
+            <span>💡</span>
+            <span>Heilráð</span>
+          </button>
         </div>
       </div>
 
@@ -5886,7 +5890,10 @@ if (pw.length() >= 8 && hefurTolu) {
         streak: 0,
         lastStreakQuestionId: null,
         showBreakBanner: false,
-        lastBreakOfferedAt: 0
+        lastBreakOfferedAt: 0,
+        questionsSinceTip: 0,
+        activeTip: null,
+        lastTipIndex: -1
       };
     }
 
@@ -6368,13 +6375,25 @@ if (pw.length() >= 8 && hefurTolu) {
         return;
       }
 
-      const prevQ = QUESTIONS[state.currentQuestionIndex];
-      if (index > state.currentQuestionIndex && prevQ && !state.completedQuestions.has(prevQ.id)) {
+      const prevIndex = state.currentQuestionIndex;
+      const prevQ = QUESTIONS[prevIndex];
+      if (index > prevIndex && prevQ && !state.completedQuestions.has(prevQ.id)) {
         state.streak = 0;
       }
       const nextQ = QUESTIONS[index];
       const movingToNewChapter = nextQ.chapter !== state.currentChapterId;
       state.currentQuestionIndex = index;
+
+      if (index > prevIndex && !movingToNewChapter) {
+        state.questionsSinceTip = (state.questionsSinceTip || 0) + 1;
+        if (state.questionsSinceTip >= 6 && !state.showBreakBanner) {
+          pickNextEncouragementTip();
+        } else {
+          state.activeTip = null;
+        }
+      } else {
+        state.activeTip = null;
+      }
       state.currentChapterId = nextQ.chapter;
       state.chapterQuestionIndex[nextQ.chapter] = index;
       resetQuestionUiState(nextQ.id);
@@ -6389,6 +6408,158 @@ if (pw.length() >= 8 && hefurTolu) {
       saveProgress();
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+    /*************************************************************************
+     * 8B. HVATNING & HEILRÁÐ FYRIR LOKAPRÓF (18 stutt skilaboð)
+     *************************************************************************/
+    const ENCOURAGEMENT_TIPS = [
+      {
+        category: 'Prófráð',
+        title: 'Skila (return) eða prenta (println)?',
+        text: 'Lestu fyrirmælin alltaf tvisvar: ef beðið er um að aðferð skili gildi á að nota return, en System.out.println aðeins ef beðið er um að prenta á skjáinn.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Stöðug æfing skilar sér',
+        text: 'Hver einasta spurning sem þú leysir styrkir kóðahugsunina. Það sem virkar snúið í dag verður sjálfsagt á prófdegi.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Mörk í fylkjum og strengjum',
+        text: 'Mundu að sæti byrja á 0 og enda á length - 1. Fylki nota a.length (án sviga), en strengir nota s.length() (með svigum).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Rekja kóða á blaði',
+        text: 'Þegar lykkja eða tvívítt fylki ruglar þig, skrifaðu upp litla töflu á blað með gildum breytanna skref fyrir skref. Það kemur í veg fyrir flestar gildrur.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Villur eru besti kennarinn',
+        text: 'Að reka sig á villu núna á æfingu þýðir að þú lendir síður í henni á prófinu sjálfu. Haltu áfram!'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Samanburður strengja',
+        text: 'Í Java ber maður strengi saman með .equals(...) — aldrei með == (nema fyrir frumtög eins og int, double, char og boolean).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Kommutöludeiling',
+        text: 'Ef þú deilir tveimur int-tölum til að fá meðaltal skaltu muna að breyta annarri tölunni í (double) áður en deilt er svo aukastafir glatist ekki.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Þrautseigja í krefjandi dæmum',
+        text: 'Þegar hugtök eins og tilvísanir eða innfelldar lykkjur taka tíma er það merki um að þú sért að læra eitthvað nýtt — ekki gefast upp!'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Prófaðu á 2–3 staka dæmi',
+        text: 'Áður en þú skrifar heila aðferð skaltu prófa hugmyndina á litlu dæmi (t.d. {4, 9} eða tómu fylki) til að sjá hvort mörkin standist.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Stjórnaðu tímanum á prófinu',
+        text: 'Ef eitt dæmi tefur þig of lengi, hoppaðu yfir á næsta, náðu öruggum stigum og komdu síðan aftur með ferskt höfuð.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Smá skref verða að stórum framförum',
+        text: 'Þú þarft ekki að kunna allt í einu. Ein æfing í senn byggir upp öryggið fyrir lokaprófið.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Leit sem skilar -1',
+        text: 'Þegar leitaraðferð skilar sætisnúmeri eða -1 ef ekkert finnst, mundu þá að prófa ix != -1 (ekki ix > 0, því 0 er gilt sæti!).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Stuttar pásur skipta máli',
+        text: 'Ef einbeitingin dvínar, taktu 3–5 mínútna pásu, teygðu úr þér eða fáðu þér vatnsglas. Heilinn vinnur úr efninu í hvíldinni.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Þú kannt meira en þú heldur',
+        text: 'Skoðaðu hversu mikið þú hefur þegar náð tökum á. Traustur grunnur í lykkjum og aðferðum fleytir þér langt.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Góður svefn fyrir prófdag',
+        text: 'Að sofa vel nóttina fyrir próf skilar oft meiru en síðbúinn lestur — þreyttur heili gerir óþarfa klaufavillur í svigum og lykkjum.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Gildissending (Pass-by-value)',
+        text: 'Breyting á int-stika inni í aðferð breytir ekki upprunalegu breytunni í main, en breyting á hólfi í fylki (a[0] = ...) helst!'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Skilningur umfram utanbókarlærdóm',
+        text: 'Þegar þú reynir fyrst sjálf(ur) áður en þú skoðar vísbendingu festist þekkingin miklu betur í minninu.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Lokaathugun á kóða',
+        text: 'Áður en þú skilar lausn, renndu augunum yfir sviga { }, semíkommur ;, skilatýpu aðferðar og hvort return sé örugglega fyrir utan lykkjuna.'
+      }
+    ];
+
+    function pickNextEncouragementTip() {
+      let nextIdx = Math.floor(Math.random() * ENCOURAGEMENT_TIPS.length);
+      if (ENCOURAGEMENT_TIPS.length > 1 && nextIdx === state.lastTipIndex) {
+        nextIdx = (nextIdx + 1) % ENCOURAGEMENT_TIPS.length;
+      }
+      state.lastTipIndex = nextIdx;
+      state.activeTip = ENCOURAGEMENT_TIPS[nextIdx];
+      state.questionsSinceTip = 0;
+    }
+
+    function renderTipBannerHtml() {
+      if (!state.activeTip) return '';
+      const tip = state.activeTip;
+      return `
+        <div id="encouragement-banner" class="mb-4 p-4 rounded-2xl bg-emerald-50/85 border border-emerald-200 flex flex-wrap items-center justify-between gap-3 animate-card">
+          <div class="flex items-start gap-2.5 min-w-0 flex-1">
+            <span class="text-lg shrink-0">💡</span>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Hvatning &amp; Heilráð</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700 border border-emerald-200">${escapeHtml(tip.category)}</span>
+              </div>
+              <div class="text-sm font-bold text-slate-900 mt-1">${escapeHtml(tip.title)}</div>
+              <p class="text-xs sm:text-sm text-slate-700 mt-0.5 leading-relaxed">${escapeHtml(tip.text)}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 ml-auto">
+            <button id="tip-next-btn" type="button" class="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition">
+              Annað heilráð
+            </button>
+            <button id="tip-dismiss-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+              Halda áfram
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindTipBannerEvents() {
+      const tipDismissBtn = document.getElementById('tip-dismiss-btn');
+      if (tipDismissBtn) {
+        tipDismissBtn.addEventListener('click', () => {
+          state.activeTip = null;
+          render();
+        });
+      }
+      const tipNextBtn = document.getElementById('tip-next-btn');
+      if (tipNextBtn) {
+        tipNextBtn.addEventListener('click', () => {
+          pickNextEncouragementTip();
+          render();
+        });
+      }
     }
 
     /*************************************************************************
@@ -6409,6 +6580,7 @@ if (pw.length() >= 8 && hefurTolu) {
     function renderLessonView() {
       const chap = CHAPTERS.find(c => c.id === state.currentChapterId);
       appContainer.innerHTML = `
+        ${renderTipBannerHtml()}
         <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
           <div class="px-6 sm:px-8 pt-6 pb-5 border-b border-slate-100 bg-gradient-to-b from-blue-50/50 to-white">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
@@ -6434,6 +6606,7 @@ if (pw.length() >= 8 && hefurTolu) {
         </section>
       `;
 
+      bindTipBannerEvents();
       document.getElementById('start-chapter-btn').addEventListener('click', () => {
         state.seenChapters.add(chap.id);
         state.mode = 'question';
@@ -6681,6 +6854,7 @@ if (pw.length() >= 8 && hefurTolu) {
 
       appContainer.innerHTML = `
         ${breakBannerHtml}
+        ${renderTipBannerHtml()}
         <article class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
           <!-- Efri spurningastika -->
           <div class="px-5 sm:px-8 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/60">
@@ -6753,6 +6927,7 @@ if (pw.length() >= 8 && hefurTolu) {
       `;
 
       // Tengja viðburði (Event listeners)
+      bindTipBannerEvents();
       const bannerTriviaBtn = document.getElementById('banner-trivia-btn');
       if (bannerTriviaBtn) {
         bannerTriviaBtn.addEventListener('click', () => {
@@ -7087,6 +7262,7 @@ if (pw.length() >= 8 && hefurTolu) {
       const pct = Math.round((done / total) * 100);
 
       appContainer.innerHTML = `
+        ${renderTipBannerHtml()}
         <div class="space-y-6 animate-card">
           <!-- Árangurskort -->
           <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
@@ -7216,6 +7392,7 @@ while (tala != 0) { summa += tala; tala = sc.nextInt(); }</code></pre>
         });
       });
 
+      bindTipBannerEvents();
       document.getElementById('restart-all-btn').addEventListener('click', () => {
         resetAllProgress();
       });
@@ -7803,6 +7980,11 @@ while (tala != 0) { summa += tala; tala = sc.nextInt(); }</code></pre>
     }
 
     document.getElementById('open-bughunt-btn').addEventListener('click', openBugHuntModal);
+    document.getElementById('open-tip-btn').addEventListener('click', () => {
+      pickNextEncouragementTip();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     document.getElementById('close-bughunt-modal-btn').addEventListener('click', closeBugHuntModal);
     document.getElementById('close-bughunt-footer-btn').addEventListener('click', closeBugHuntModal);
     bughuntActionBtn.addEventListener('click', () => {

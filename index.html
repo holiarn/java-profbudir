@@ -143,11 +143,11 @@
               </div>
               <div>
                 <h3 class="text-lg font-bold text-slate-900">Hluti 2: Aðferðir &amp; Fylki</h3>
-                <p class="text-xs text-slate-500">5 kaflar • Aðferðir, 1D &amp; 2D fylki</p>
+                <p class="text-xs text-slate-500">5 kaflar • 160 spurningar</p>
               </div>
             </div>
             <span id="p2-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-              0 / 36
+              0 / 160
             </span>
           </div>
 
@@ -165,6 +165,28 @@
         </a>
       </article>
     </div>
+
+    <!-- Hvatning & Heilráð -->
+    <section class="mt-6 bg-emerald-50/70 rounded-2xl border border-emerald-200 p-5 sm:p-6 animate-card" aria-label="Hvatning og heilráð">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base shrink-0">
+            💡
+          </div>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Hvatning &amp; Heilráð</span>
+              <span id="home-tip-category" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700 border border-emerald-200">Prófráð</span>
+            </div>
+            <h3 id="home-tip-title" class="text-sm sm:text-base font-bold text-slate-900"></h3>
+            <p id="home-tip-text" class="text-sm text-slate-700 mt-1 leading-relaxed"></p>
+          </div>
+        </div>
+        <button id="home-tip-next-btn" type="button" class="px-3.5 py-2 rounded-xl border border-emerald-300 bg-white text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition shrink-0">
+          Nýtt heilráð
+        </button>
+      </div>
+    </section>
   </main>
 
   <!-- FÓTUR -->
@@ -194,9 +216,30 @@
     document.getElementById('p1-bar').style.width = `${Math.min(100, Math.round((p1Done / p1Total) * 100))}%`;
 
     const p2Done = readSavedDoneCount('java_profbudir_hluti2_progress_v1');
-    const p2Total = 36;
+    const p2Total = 160;
     document.getElementById('p2-badge').textContent = `${p2Done} / ${p2Total}`;
     document.getElementById('p2-bar').style.width = `${Math.min(100, Math.round((p2Done / p2Total) * 100))}%`;
+
+    const HOME_TIPS = [
+      { category: 'Prófráð', title: 'Skila (return) eða prenta (println)?', text: 'Lestu fyrirmælin alltaf tvisvar: ef beðið er um að aðferð skili gildi á að nota return, en System.out.println aðeins ef beðið er um að prenta.' },
+      { category: 'Hvatning', title: 'Stöðug æfing skilar sér', text: 'Hver einasta spurning sem þú leysir styrkir kóðahugsunina. Það sem virkar snúið í dag verður sjálfsagt á prófdegi.' },
+      { category: 'Prófráð', title: 'Rekja kóða á blaði', text: 'Þegar lykkja eða tvívítt fylki ruglar þig, skrifaðu upp litla töflu á blað með gildum breytanna skref fyrir skref. Það kemur í veg fyrir flestar gildrur.' },
+      { category: 'Prófráð', title: 'Prófaðu hugsunina á litlu dæmi', text: 'Áður en þú skrifar heila aðferð skaltu prófa hugmyndina á 2–3 staka fylki eða tómu fylki til að sjá hvort mörkin standist.' },
+      { category: 'Hvatning', title: 'Villur eru besti kennarinn', text: 'Að reka sig á villu núna á æfingu þýðir að þú lendir síður í henni á prófinu sjálfu.' },
+      { category: 'Prófráð', title: 'Góður svefn fyrir prófdag', text: 'Að sofa vel nóttina fyrir próf skilar oft meiru en síðbúinn lestur — þreyttur heili gerir óþarfa klaufavillur í svigum og lykkjum.' }
+    ];
+    let homeTipIdx = Math.floor(Math.random() * HOME_TIPS.length);
+    function renderHomeTip() {
+      const tip = HOME_TIPS[homeTipIdx];
+      document.getElementById('home-tip-category').textContent = tip.category;
+      document.getElementById('home-tip-title').textContent = tip.title;
+      document.getElementById('home-tip-text').textContent = tip.text;
+    }
+    renderHomeTip();
+    document.getElementById('home-tip-next-btn').addEventListener('click', () => {
+      homeTipIdx = (homeTipIdx + 1) % HOME_TIPS.length;
+      renderHomeTip();
+    });
   </script>
 </body>
 </html>

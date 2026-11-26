@@ -113,6 +113,10 @@
             <span class="hidden sm:inline">Smáleikur:</span>
             <span>Villuveiðar</span>
           </button>
+          <button id="open-tip-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition inline-flex items-center gap-1" title="Hvatning og prófráð">
+            <span>💡</span>
+            <span>Heilráð</span>
+          </button>
         </div>
       </div>
 
@@ -1730,874 +1734,6 @@ public static void main(String[] args) {
           const clean = stripJavaComments(rawCode);
           const basic = checkBasicSyntax(clean);
           const checks = [];
-
-          const hasDecl = /\bint\s*\[\s*\]\s+einkunnir\s*=/.test(clean) || /\bint\s+einkunnir\s*\[\s*\]\s*=/.test(clean);
-          checks.push({
-            ok: hasDecl,
-            text: hasDecl
-              ? 'Skilgreinir heiltölufylkið einkunnir.'
-              : 'Vantar skilgreiningu á heiltölufylkinu einkunnir.'
-          });
-
-          const hasNew = /\bnew\s+int\s*\[\s*4\s*\]/.test(clean);
-          checks.push({
-            ok: hasNew,
-            text: hasNew
-              ? 'Tekur frá pláss fyrir 4 heiltölur.'
-              : 'Vantar að taka frá pláss fyrir 4 stök í nýja fylkinu.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Flott! Þú bjóst til fylkið rétt.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-
-      // --- STIG 2: Sæti (Index), .length og mörk fylkis (Q7-Q12) ---
-      {
-        id: 39,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 2: Sæti í fylki',
-        title: 'Lesa fyrsta stakið (sæti 0)',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {14, 28, 35};
-System.out.println(a[0]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['14'],
-        hints: [
-          'Eins og í strengjum byrjar talning sæta í fylki alltaf á 0!',
-          'a[0] er fyrsta stakið í fylkinu.'
-        ],
-        explanation: '<code class="code-font">a[0]</code> sækir fyrsta stakið (<code class="code-font">14</code>), <code class="code-font">a[1]</code> sækir 28 og <code class="code-font">a[2]</code> sækir 35.'
-      },
-      {
-        id: 40,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 2: Breyta staki í fylki',
-        title: 'Uppfæra hólf og leggja saman',
-        promptHtml: 'Hvað prentast út þegar þessi kóði keyrir?',
-        codeSnippet:
-`int[] a = {5, 10, 15};
-a[1] = 20;
-System.out.println(a[0] + a[1]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['25'],
-        hints: [
-          'a[1] byrjar sem 10, en línan a[1] = 20; breytir því í 20.',
-          'Hvað er a[0] (5) + a[1] (20)?'
-        ],
-        explanation: 'Ólíkt strengjum eru fylki breytanleg — þú getur hvenær sem er uppfært einstök hólf með <code class="code-font">a[i] = nyttGildi;</code>.'
-      },
-      {
-        id: 41,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Hugtak',
-        stage: 'Stig 2: .length vs. .length() (GILDRA!)',
-        title: 'Lengd fylkis án sviga',
-        promptHtml: 'Hvernig fær maður lengd fylkisins <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">arr</code> í Java?',
-        options: [
-          { id: 'a', text: 'arr.length (án sviga!)' },
-          { id: 'b', text: 'arr.length() (með svigum)' },
-          { id: 'c', text: 'arr.size()' },
-          { id: 'd', text: 'length(arr)' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'Strengir nota .length() með svigum, en fylki nota eigind án sviga!',
-          'Ef þú setur sviga á eftir arr.length færðu þýðingarvillu.'
-        ],
-        explanation: 'Mjög mikilvægur munur á prófum: <code class="code-font">strengur.length()</code> (aðferð með svigum) vs. <code class="code-font">fylki.length</code> (eigind án sviga).'
-      },
-      {
-        id: 42,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Villuleit',
-        stage: 'Stig 2: Mörk fylkis (GILDRA!)',
-        title: 'Út fyrir mörk fylkis',
-        promptHtml: 'Hvað gerist ef við keyrum þennan kóða?',
-        codeSnippet:
-`int[] a = {10, 20, 30};
-System.out.println(a[3]);`,
-        options: [
-          { id: 'a', text: 'Forritið hrynur við keyrslu (ArrayIndexOutOfBoundsException)' },
-          { id: 'b', text: 'Það prentar 30' },
-          { id: 'c', text: 'Það prentar 0' },
-          { id: 'd', text: 'Það prentar null' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'Fylkið hefur 3 stök, svo lögleg sæti eru 0, 1 og 2.',
-          'Sæti 3 (sem er jafnt og a.length) er fyrir UTAN endann á fylkinu!'
-        ],
-        explanation: 'Síðasta löglega sætið í fylki er alltaf <code class="code-font">a.length - 1</code>. Að reyna að lesa <code class="code-font">a[a.length]</code> veldur <code class="code-font">ArrayIndexOutOfBoundsException</code>.'
-      },
-      {
-        id: 43,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 2: Síðasta stakið',
-        title: 'Sækja síðasta stakið með length - 1',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {7, 11, 19, 42};
-System.out.println(a[a.length - 1]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['42'],
-        hints: [
-          'a.length er 4, svo a.length - 1 er 3.',
-          'Hvaða tala er í sæti 3 (síðasta sætinu)?'
-        ],
-        explanation: '<code class="code-font">a[a.length - 1]</code> er staðlaða leiðin til að ná í síðasta stakið í hvaða ótóma fylki sem er.'
-      },
-      {
-        id: 44,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 2: Skrifa kóða með sætum og .length',
-        title: 'Breyta fyrsta og prenta síðasta stakið',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] gogn = {5, 10, 15, 20};</code>. Breyttu <strong>FYRSTA</strong> stakinu í <code class="code-font">99</code> og prentaðu síðan <strong>SÍÐASTA</strong> stakið út á almennan hátt (óháð lengd fylkisins).',
-        contextBefore: 'int[] gogn = {5, 10, 15, 20};',
-        starterCode: `// Breyttu fyrsta stakinu í 99 og prentaðu síðasta stakið:\n`,
-        modelSolution:
-`gogn[0] = 99;
-System.out.println(gogn[gogn.length - 1]);`,
-        hints: [
-          'Fyrsta stakið fær nýtt gildi með: gogn[0] = 99;',
-          'Síðasta stakið er gogn[gogn.length - 1] — prentaðu það með System.out.println(...).'
-        ],
-        explanation: 'Vel gert! Hér notar þú bæði vísun í fyrsta stak og almenna formúlu fyrir síðasta stak.',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const hasAssign = /\bgogn\s*\[\s*0\s*\]\s*=\s*99\s*;/.test(clean);
-          checks.push({
-            ok: hasAssign,
-            text: hasAssign
-              ? 'Uppfærir fyrsta stakið í 99.'
-              : 'Vantar að setja gildið 99 í fyrsta sæti fylkisins.'
-          });
-
-          const hasPrintLast = /System\.out\.println\s*\(\s*gogn\s*\[\s*gogn\.length\s*-\s*1\s*\]\s*\)\s*;/.test(clean);
-          checks.push({
-            ok: hasPrintLast,
-            text: hasPrintLast
-              ? 'Prentar síðasta stakið á almennan hátt (óháð lengd).'
-              : 'Vantar útprentun á síðasta stakinu á almennan hátt (óháð lengd).'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Vel gert! Bæði uppfærslan og almenna vísunin í síðasta stakið eru rétt.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-
-      // --- STIG 3: Ítrekun með venjulegri for-lykkju (Q13-Q18) ---
-      {
-        id: 45,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 3: Rakning á fylkislykkju',
-        title: 'Prenta öll stök með for-lykkju',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {2, 4, 6};
-for (int i = 0; i < a.length; i++) {
-    System.out.print(a[i] + " ");
-}`,
-        placeholder: 't.d. 1 2 3',
-        acceptedAnswers: ['2 4 6', '2 4 6 '],
-        hints: [
-          'i fer í gegnum 0, 1 og 2 (því a.length er 3).',
-          'Í hverri umferð prentast a[i] fylgt af bili.'
-        ],
-        explanation: '<code class="code-font">for (int i = 0; i &lt; a.length; i++)</code> er grunnmynstrið til að heimsækja öll stök fylkis í röð.'
-      },
-      {
-        id: 46,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Villuleit',
-        stage: 'Stig 3: Off-by-one gildra í fylkislykkju',
-        title: 'Gildran: <= a.length',
-        promptHtml: 'Hver er villan í þessari <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">for</code>-lykkju?',
-        codeSnippet:
-`int[] a = {1, 2, 3, 4};
-for (int i = 0; i <= a.length; i++) {
-    System.out.println(a[i]);
-}`,
-        options: [
-          { id: 'a', text: 'Skilyrðið i <= a.length reynir að lesa a[4] í lokin og veldur ArrayIndexOutOfBoundsException' },
-          { id: 'b', text: 'i verður að byrja á 1' },
-          { id: 'c', text: 'Það þarf sviga á eftir a.length()' },
-          { id: 'd', text: 'Lykkjan keyrir aldrei' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'Skoðaðu <= í skilyrðinu!',
-          'Þegar i verður 4 er 4 <= 4 satt, en a[4] er ekki til.'
-        ],
-        explanation: 'Í fylkislykkjum á alltaf að standa <code class="code-font">i &lt; a.length</code> (strangt minna en), aldrei <code class="code-font">&lt;=</code>.'
-      },
-      {
-        id: 47,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 3: Fylla fylki í lykkju',
-        title: 'Reikna gildi fyrir hvert sæti',
-        promptHtml: 'Hvað prentast út í lokin?',
-        codeSnippet:
-`int[] a = new int[4];
-for (int i = 0; i < a.length; i++) {
-    a[i] = i * 3;
-}
-System.out.println(a[3]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['9'],
-        hints: [
-          'Lykkjan setur i * 3 í hvert sæti: a[0]=0, a[1]=3, a[2]=6, a[3]=9.',
-          'Hvað er í a[3]?'
-        ],
-        explanation: '<code class="code-font">a[3]</code> fær gildið <code class="code-font">3 * 3 = 9</code>.'
-      },
-      {
-        id: 48,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 3: Uppfæra öll stök í fylki',
-        title: 'Hækka öll stök um 5',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {10, 20, 30};
-for (int i = 0; i < a.length; i++) {
-    a[i] += 5;
-}
-System.out.println(a[1]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['25'],
-        hints: [
-          'Lykkjan bætir 5 við hvert stak í fylkinu: {15, 25, 35}.',
-          'a[1] var 20 og hækkar um 5.'
-        ],
-        explanation: 'Með venjulegri <code class="code-font">for</code>-lykkju og sæti <code class="code-font">i</code> getum við auðveldlega breytt öllum stökum fylkisins.'
-      },
-      {
-        id: 49,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 3: Öfug röð í fylki',
-        title: 'Prenta fylki aftur á bak',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {1, 2, 3};
-for (int i = a.length - 1; i >= 0; i--) {
-    System.out.print(a[i]);
-}`,
-        placeholder: 't.d. 321',
-        acceptedAnswers: ['321'],
-        hints: [
-          'i byrjar á a.length - 1 (sem er 2 -> a[2] = 3) og telur niður í 0.',
-          'Prentar a[2], a[1], a[0] án bila.'
-        ],
-        explanation: 'Að byrja á <code class="code-font">a.length - 1</code> og telja niður með <code class="code-font">i--</code> prentar fylkið aftur á bak: <code class="code-font">321</code>.'
-      },
-      {
-        id: 50,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 3: Skrifa for-lykkju yfir fylki',
-        title: 'Prenta öll stök í tolur',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] tolur = {3, 6, 9, 12};</code>. Skrifaðu venjulega vísislykkju (sem virkar fyrir hvaða lengd fylkis sem er) sem prentar hvert stak á nýrri línu.',
-        contextBefore: 'int[] tolur = {3, 6, 9, 12};',
-        starterCode: `// Skrifaðu for-lykkju sem prentar öll stök tolur:\n`,
-        modelSolution:
-`for (int i = 0; i < tolur.length; i++) {
-    System.out.println(tolur[i]);
-}`,
-        hints: [
-          'Byrjaðu á: for (int i = 0; i < tolur.length; i++) {',
-          'Settu System.out.println(tolur[i]); inni í svigana.'
-        ],
-        explanation: 'Þetta er undirstöðulykkjan fyrir alla vinnslu á fylkjum í Java.',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const forMatch = clean.match(/\bfor\s*\(\s*int\s+([a-zA-Z_]\w*)\s*=\s*0\s*;\s*\1\s*<\s*tolur\.length\s*;/);
-          const idxVar = forMatch ? forMatch[1] : 'i';
-          checks.push({
-            ok: Boolean(forMatch),
-            text: forMatch
-              ? 'Notar lykkju yfir öll lögleg sæti fylkisins.'
-              : 'Vantar venjulega vísislykkju sem fer yfir öll lögleg sæti fylkisins.'
-          });
-
-          const hasPrint = new RegExp(`System\\.out\\.println\\s*\\(\\s*tolur\\s*\\[\\s*${idxVar}\\s*\\]\\s*\\)\\s*;`).test(clean);
-          checks.push({
-            ok: hasPrint,
-            text: hasPrint
-              ? 'Prentar núverandi stak úr fylkinu í hverri umferð.'
-              : 'Vantar útprentun á núverandi staki úr fylkinu inni í lykkjunni.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Vel gert! Fylkislykkjan er komin á hreint.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-
-      // --- STIG 4: for-each lykkjan (Enhanced for loop) (Q19-Q24) ---
-      {
-        id: 51,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Hugtak',
-        stage: 'Stig 4: for-each lykkjan',
-        title: 'Hvað þýðir for (int tala : fylki)?',
-        promptHtml: 'Hvernig les maður þessa lykkju: <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">for (int tala : fylki) { ... }</code>?',
-        options: [
-          { id: 'a', text: '"Fyrir hverja heiltölu tala í fylkinu fylki..."' },
-          { id: 'b', text: '"Telja frá tala upp í fylki..."' },
-          { id: 'c', text: '"Deila tala með fylki..."' },
-          { id: 'd', text: 'Þessi setning er ólögleg í Java' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'Tvípunkturinn (:) stendur fyrir "í" (in).',
-          'Breytan tala fær sjálfkrafa gildi hvers staks í fylkinu, eitt af öðru.'
-        ],
-        explanation: '<code class="code-font">for-each</code> lykkja losar okkur við sætisbreytuna <code class="code-font">i</code> þegar við viljum bara skoða hvert gildi í röð.'
-      },
-      {
-        id: 52,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 4: Rakning á for-each lykkju',
-        title: 'Leggja saman með for-each',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {4, 5, 6};
-int s = 0;
-for (int x : a) {
-    s += x;
-}
-System.out.println(s);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['15'],
-        hints: [
-          'x tekur gildin 4, svo 5, svo 6.',
-          's leggur þau saman: 4 + 5 + 6.'
-        ],
-        explanation: '<code class="code-font">for-each</code> lykkja er sérstaklega hrein og þægileg til að leggja saman stök í fylki.'
-      },
-      {
-        id: 53,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 4: for-each gildran! (Breyting á stökum)',
-        title: 'Breytist fylkið í for-each lykkju?',
-        promptHtml: 'Hvað prentast út þegar þessi kóði keyrir? (Passaðu þig!)',
-        codeSnippet:
-`int[] a = {10, 20, 30};
-for (int x : a) {
-    x = 99;
-}
-System.out.println(a[0]);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['10'],
-        commonMistakes: {
-          '99': 'Gildra! Í for-each lykkju er x bara afrit af gildinu í fylkinu, svo x = 99 breytir EKKI fylkinu a!'
-        },
-        hints: [
-          'Í for-each lykkju er x aðeins staðbundið AFRIT af gildinu í fylkinu!',
-          'x = 99 breytir bara afritinu x, en snertir EKKI hólfin í fylkinu a!'
-        ],
-        explanation: 'Mjög mikilvæg prófgildra! Þú getur <strong>ALDREI</strong> breytt stökum í fylki með <code class="code-font">for-each</code> lykkju — til þess verður að nota venjulega <code class="code-font">for</code>-lykkju með <code class="code-font">a[i]</code>.'
-      },
-      {
-        id: 54,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Hugtak',
-        stage: 'Stig 4: Hvenær dugar for-each EKKI?',
-        title: 'Takmarkanir for-each lykkjunnar',
-        promptHtml: 'Í hvaða tilviki <strong>VERÐUR</strong> þú að nota venjulega <code class="code-font">for</code>-lykkju (með <code class="code-font">int i</code>) í stað <code class="code-font">for-each</code> lykkju?',
-        options: [
-          { id: 'a', text: 'Þegar þú þarft að breyta stökum í fylkinu, fara aftur á bak, eða vita í hvaða sæti (index) stak er' },
-          { id: 'b', text: 'Þegar þú vilt bara prenta öll stök í réttri röð' },
-          { id: 'c', text: 'Þegar þú vilt leggja saman allar tölur í fylkinu' },
-          { id: 'd', text: 'Þegar þú vilt telja hversu margar tölur eru jákvæðar' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'for-each felur sætisnúmerið (i) og fer alltaf frá sæti 0 til enda.',
-          'Ef þú þarft sætið (t.d. í leit eða til að uppfæra a[i]) notarðu venjulega for-lykkju.'
-        ],
-        explanation: '<code class="code-font">for-each</code> er frábær til að lesa gildi í áframhaldandi röð, en venjuleg <code class="code-font">for</code>-lykkja er nauðsynleg þegar sætið <code class="code-font">i</code> skiptir máli.'
-      },
-      {
-        id: 55,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 4: for-each með String[]',
-        title: 'Telja orð af ákveðinni lengd',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`String[] ord = {"sol", "mani", "stjarna"};
-int tel = 0;
-for (String s : ord) {
-    if (s.length() == 4) {
-        tel++;
-    }
-}
-System.out.println(tel);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['1'],
-        hints: [
-          'Skoðaðu lengd hvers orðs: "sol" (3), "mani" (4), "stjarna" (7).',
-          'Hversu mörg orð hafa lengdina 4?'
-        ],
-        explanation: 'Aðeins <code class="code-font">"mani"</code> hefur 4 stafi, svo <code class="code-font">tel</code> verður <code class="code-font">1</code>.'
-      },
-      {
-        id: 56,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 4: Skrifa for-each lykkju',
-        title: 'Prenta stök með for-each lykkju',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] gogn = {2, 4, 6, 8};</code>. Notaðu aukna lykkju (for-each) til að prenta hvert stak í sinni línu.',
-        contextBefore: 'int[] gogn = {2, 4, 6, 8};',
-        starterCode: `// Skrifaðu for-each lykkju hér:\n`,
-        modelSolution:
-`for (int t : gogn) {
-    System.out.println(t);
-}`,
-        hints: [
-          'Byrjaðu á: for (int t : gogn) {',
-          'Inni í svigunum: System.out.println(t);'
-        ],
-        explanation: 'Svona stutt og hrein er <code class="code-font">for-each</code> lykkja þegar þú þarft bara að lesa gildin.',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const forEachMatch = clean.match(/\bfor\s*\(\s*int\s+([a-zA-Z_]\w*)\s*:\s*gogn\s*\)/);
-          const itemVar = forEachMatch ? forEachMatch[1] : 't';
-          checks.push({
-            ok: Boolean(forEachMatch),
-            text: forEachMatch
-              ? 'Notar aukna for-each lykkju yfir fylkið gogn.'
-              : 'Vantar aukna for-each lykkju yfir fylkið gogn.'
-          });
-
-          const hasPrint = new RegExp(`System\\.out\\.println\\s*\\(\\s*${itemVar}\\s*\\)\\s*;`).test(clean);
-          checks.push({
-            ok: hasPrint,
-            text: hasPrint
-              ? 'Prentar hvert stak úr fylkinu.'
-              : 'Vantar útprentun á breytunni inni í lykkjunni.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Flott! for-each lykkjan er hrein og rétt.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-
-      // --- STIG 5: Summun, meðaltal og talning í fylki (Q25-Q28) ---
-      {
-        id: 57,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 5: Meðaltal fylkis',
-        title: 'Nákvæmt meðaltal staka í fylki',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] a = {3, 4, 5, 6};
-int summa = 0;
-for (int x : a) {
-    summa += x;
-}
-System.out.println((double) summa / a.length);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['4.5'],
-        hints: [
-          'Summa talnanna er 3 + 4 + 5 + 6 = 18.',
-          'a.length er 4, og 18.0 / 4 er 4.5.'
-        ],
-        explanation: '<code class="code-font">(double) summa / a.length</code> gefur nákvæmt meðaltal fylkisins.'
-      },
-      {
-        id: 58,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 5: Telja stök yfir ákveðnu marki',
-        title: 'Telja hve margir stóðust',
-        promptHtml: 'Hvað prentast út?',
-        codeSnippet:
-`int[] eink = {4, 7, 9, 5, 8};
-int stodust = 0;
-for (int i = 0; i < eink.length; i++) {
-    if (eink[i] >= 5) {
-        stodust++;
-    }
-}
-System.out.println(stodust);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['4'],
-        hints: [
-          'Teldu hversu margar einkunnir í {4, 7, 9, 5, 8} eru >= 5.',
-          '7, 9, 5 og 8 uppfylla skilyrðið (aðeins 4 fellur).'
-        ],
-        explanation: '4 einkunnir eru <code class="code-font">&gt;= 5</code>, svo <code class="code-font">stodust</code> verður <code class="code-font">4</code>.'
-      },
-      {
-        id: 59,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 5: Reikna og prenta meðaltal fylkis',
-        title: 'Meðaltal staka í stig',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] stig = {12, 8, 15, 20, 5};</code>. Leggðu öll stökin saman í <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int summa = 0;</code> og prentaðu nákvæmt kommutölumeðaltal.',
-        contextBefore: 'int[] stig = {12, 8, 15, 20, 5};\nint summa = 0;',
-        starterCode: `// Leggðu stökin saman og prentaðu nákvæmt double meðaltal:\n`,
-        modelSolution:
-`for (int s : stig) {
-    summa += s;
-}
-System.out.println((double) summa / stig.length);`,
-        hints: [
-          'Leggðu stökin saman í lykkju: for (int s : stig) { summa += s; }',
-          'Prentaðu svo: System.out.println((double) summa / stig.length);'
-        ],
-        explanation: 'Summan er 60 og lengdin er 5, svo meðaltalið er <code class="code-font">12.0</code>.',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const hasLoop = /\bfor\s*\(/.test(clean) || /\bwhile\s*\(/.test(clean);
-          const hasAccum = /\bsumma\s*(?:\+=|=\s*summa\s*\+)/.test(clean);
-          checks.push({
-            ok: hasLoop && hasAccum,
-            text: (hasLoop && hasAccum)
-              ? 'Leggur öll stök fylkisins saman í summa.'
-              : 'Vantar lykkju sem leggur stök fylkisins við summa.'
-          });
-
-          const hasBadCast = /\(\s*double\s*\)\s*\(\s*summa\s*\/\s*(?:stig\.length|5)\s*\)/.test(clean);
-          const hasGoodCast = !hasBadCast && (
-            /\(\s*double\s*\)\s*summa\s*\/\s*(?:stig\.length|5)/.test(clean) ||
-            /summa\s*\/\s*\(\s*double\s*\)\s*(?:stig\.length|5)/.test(clean)
-          );
-          checks.push({
-            ok: hasGoodCast,
-            text: hasGoodCast
-              ? 'Framkvæmir kommutöludeilingu í stað heiltöludeilingar.'
-              : 'Vantar kommutöludeilingu við lengd fylkisins (passaðu að heiltöludeilingin gerist ekki á undan týpubreytingunni).'
-          });
-
-          const hasPrint = /System\.out\.println\s*\(/.test(clean);
-          checks.push({
-            ok: hasPrint,
-            text: hasPrint
-              ? 'Prentar meðaltalið út.'
-              : 'Vantar útprentun á meðaltalinu.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Vel gert! Meðaltal fylkisins er rétt reiknað.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-      {
-        id: 60,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 5: Telja sléttar tölur í fylki',
-        title: 'Telja sléttar tölur í tolur',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] tolur = {4, 7, 10, 13, 16};</code>. Teldu hversu margar tölur í fylkinu eru <strong>SLÉTTAR</strong> í <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int fjoldi = 0;</code> og prentaðu <code class="code-font">fjoldi</code> í lokin.',
-        contextBefore: 'int[] tolur = {4, 7, 10, 13, 16};\nint fjoldi = 0;',
-        starterCode: `// Teldu sléttar tölur í tolur og prentaðu fjoldi:\n`,
-        modelSolution:
-`for (int t : tolur) {
-    if (t % 2 == 0) {
-        fjoldi++;
-    }
-}
-System.out.println(fjoldi);`,
-        hints: [
-          'Farðu yfir fylkið og athugaðu if (t % 2 == 0) { fjoldi++; }',
-          'Prentaðu fjoldi fyrir utan lykkjuna.'
-        ],
-        explanation: 'Í fylkinu eru 3 sléttar tölur (<code class="code-font">4, 10</code> og <code class="code-font">16</code>).',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const hasLoop = /\bfor\s*\(/.test(clean) || /\bwhile\s*\(/.test(clean);
-          const hasEven = /%\s*2\s*==\s*0|0\s*==\s*[^;]*%\s*2/.test(clean);
-          const hasInc = /\bfjoldi\s*\+\+|\+\+\s*fjoldi|\bfjoldi\s*\+=\s*1|\bfjoldi\s*=\s*fjoldi\s*\+\s*1/.test(clean);
-          checks.push({
-            ok: hasLoop && hasEven && hasInc,
-            text: (hasLoop && hasEven && hasInc)
-              ? 'Fer yfir fylkið, athugar rétt hvort talan sé slétt og hækkar fjoldi.'
-              : 'Vantar lykkju, skilyrði sem athugar hvort talan sé slétt og hækkun á fjoldi.'
-          });
-
-          const hasPrint = /System\.out\.println\s*\(\s*fjoldi\s*\)\s*;/.test(clean);
-          checks.push({
-            ok: hasPrint,
-            text: hasPrint
-              ? 'Prentar fjoldi í lokin.'
-              : 'Vantar útprentun á fjoldi í lokin.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Vel gert! Talning sléttra talna í fylkinu er rétt.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-
-      // --- STIG 6: Hámark (max), lágmark (min) og Scanner-fylki (Q29-Q32) ---
-      {
-        id: 61,
-        chapter: 2,
-        type: 'mcq',
-        badge: 'Hugtak',
-        stage: 'Stig 6: Örugg upphafsstilling á max í fylki',
-        title: 'Upphafsstilla max fyrir neikvæðar tölur',
-        promptHtml: 'Þú átt að finna stærsta stakið í <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] a</code> (sem getur innihaldið neikvæðar tölur, t.d. <code class="code-font">{-8, -3, -12}</code>). Hvernig á að upphafsstilla <code class="code-font">max</code>?',
-        options: [
-          { id: 'a', text: 'int max = a[0]; (og láta lykkjuna byrja í i = 1)' },
-          { id: 'b', text: 'int max = 0;' },
-          { id: 'c', text: 'int max = -1;' },
-          { id: 'd', text: 'int max = a.length;' }
-        ],
-        correctOption: 'a',
-        hints: [
-          'Ef max byrjar sem 0 myndir þú fá 0 út úr {-8, -3, -12}, sem er rangt!',
-          'Fyrsta stakið a[0] er alltaf raunverulegt stak úr fylkinu.'
-        ],
-        explanation: 'Að byrja með <code class="code-font">int max = a[0];</code> (og sama fyrir <code class="code-font">int min = a[0];</code>) er gullna reglan fyrir max/min í fylkjum.'
-      },
-      {
-        id: 62,
-        chapter: 2,
-        type: 'input',
-        badge: 'Kóðarakning',
-        stage: 'Stig 6: Finna sæti (index) minnsta staksins',
-        title: 'Sæti minnsta staksins (minIndex)',
-        promptHtml: 'Hvað prentast út? (ATH: Hér prentum við <strong>SÆTIÐ</strong> <code class="code-font">minIndex</code>, ekki gildið!)',
-        codeSnippet:
-`int[] a = {15, 8, 22, 4, 11};
-int minIndex = 0;
-for (int i = 1; i < a.length; i++) {
-    if (a[i] < a[minIndex]) {
-        minIndex = i;
-    }
-}
-System.out.println(minIndex);`,
-        placeholder: 'Skrifaðu tölu...',
-        acceptedAnswers: ['3'],
-        commonMistakes: {
-          '4': '4 er gildið sjálft, en spurt er hvað minIndex (sætið!) prentar!'
-        },
-        hints: [
-          'Minnsta talan í fylkinu er 4.',
-          'Í hvaða sæti (index) er talan 4? (0=15, 1=8, 2=22, 3=4).'
-        ],
-        explanation: 'Mjög algengt prófmynstur: geyma sætið <code class="code-font">minIndex</code> og bera saman <code class="code-font">a[i] &lt; a[minIndex]</code>. Hér er minnsta stakið í sæti <code class="code-font">3</code>.'
-      },
-      {
-        id: 63,
-        chapter: 2,
-        type: 'code',
-        badge: 'Skrifaðu kóða',
-        stage: 'Stig 6: Finna stærsta stakið í fylki',
-        title: 'Hæsti hitinn í hiti',
-        promptHtml: 'Gefið er fylkið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] hiti = {-4, -1, -9, -2};</code>. Finndu stærsta gildið í breytuna <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">max</code> (upphafsstilltu á öruggan hátt) og prentaðu <code class="code-font">max</code> í lokin.',
-        contextBefore: 'int[] hiti = {-4, -1, -9, -2};',
-        starterCode: `// Finndu og prentaðu stærsta stakið í hiti:\n`,
-        modelSolution:
-`int max = hiti[0];
-for (int i = 1; i < hiti.length; i++) {
-    if (hiti[i] > max) {
-        max = hiti[i];
-    }
-}
-System.out.println(max);`,
-        hints: [
-          'Byrjaðu á: int max = hiti[0];',
-          'Farðu frá i = 1 upp í hiti.length: ef hiti[i] > max, settu max = hiti[i];.'
-        ],
-        explanation: 'Hæsti hitinn í <code class="code-font">{-4, -1, -9, -2}</code> er <code class="code-font">-1</code>.',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const hasInit = /\bint\s+max\s*=\s*(?:hiti\s*\[\s*0\s*\]|Integer\.MIN_VALUE)\s*;/.test(clean);
-          checks.push({
-            ok: hasInit,
-            text: hasInit
-              ? 'Upphafsstillir max örugglega út frá fyrsta stakinu (eða lágmarksgildi).'
-              : 'Vantar örugga upphafsstillingu á max.'
-          });
-
-          const hasLoop = /\bfor\s*\(/.test(clean) || /\bwhile\s*\(/.test(clean);
-          const hasUpdate = /(?:>\s*max|max\s*<)[\s\S]*max\s*=|Math\.max\s*\(/.test(clean);
-          checks.push({
-            ok: hasLoop && hasUpdate,
-            text: (hasLoop && hasUpdate)
-              ? 'Ber öll stök saman við max í lykkju og uppfærir ef stærra finnst.'
-              : 'Vantar lykkju sem ber stök saman við max og uppfærir það.'
-          });
-
-          const hasPrint = /System\.out\.println\s*\(\s*max\s*\)\s*;/.test(clean);
-          checks.push({
-            ok: hasPrint,
-            text: hasPrint
-              ? 'Prentar max í lokin.'
-              : 'Vantar útprentun á max í lokin.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Flott! Hámarkið fannst örugglega þrátt fyrir neikvæðar tölur.'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
-      {
-        id: 64,
-        chapter: 2,
-        type: 'code',
-        badge: 'Prófdæmi (Lokaþraut)',
-        stage: 'Stig 6: Lokaverkefni Kafla 2 (Lesa inn í fylki og prenta öfugt)',
-        title: 'Lesa n tölur og prenta öfugt',
-        promptHtml: '<code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">Scanner sc = new Scanner(System.in);</code> og <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int n = sc.nextInt();</code> (<code class="code-font">n &gt;= 1</code>) eru tilbúin. Búðu til fylki <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] fylki = new int[n];</code>, lestu <code class="code-font">n</code> heiltölur inn í fylkið og prentaðu síðan stökin í <strong>ÖFUGRI RÖÐ</strong>, hvert á sinni línu.',
-        contextBefore: 'Scanner sc = new Scanner(System.in);\nint n = sc.nextInt();',
-        starterCode: `// Búðu til fylki af stærð n, lestu inn n tölur og prentaðu í öfugri röð:\n`,
-        modelSolution:
-`int[] fylki = new int[n];
-for (int i = 0; i < fylki.length; i++) {
-    fylki[i] = sc.nextInt();
-}
-for (int i = fylki.length - 1; i >= 0; i--) {
-    System.out.println(fylki[i]);
-}`,
-        hints: [
-          'Fyrri lykkjan fyllir fylkið: for (int i = 0; i < fylki.length; i++) { fylki[i] = sc.nextInt(); }',
-          'Seinni lykkjan fer aftur á bak: for (int i = fylki.length - 1; i >= 0; i--) { System.out.println(fylki[i]); }'
-        ],
-        explanation: 'Frábært! Ein helsta ástæða þess að við geymum gögn í fylki er einmitt til að geta unnið með þau aftur á bak eða mörgum sinnum!',
-        validateCode: function (rawCode) {
-          const clean = stripJavaComments(rawCode);
-          const basic = checkBasicSyntax(clean);
-          const checks = [];
-
-          const allocMatch = clean.match(/\bint\s*\[\s*\]\s+([a-zA-Z_]\w*)\s*=\s*new\s+int\s*\[\s*n\s*\]\s*;/);
-          const arrVar = allocMatch ? allocMatch[1] : 'fylki';
-          checks.push({
-            ok: Boolean(allocMatch),
-            text: allocMatch
-              ? `Býr til heiltölufylki (${arrVar}) af stærð n.`
-              : 'Vantar að búa til nýtt heiltölufylki af stærð n.'
-          });
-
-          const hasReadLoop = new RegExp(`\\bfor\\s*\\([^)]*\\)[\\s\\S]*?${arrVar}\\s*\\[[^\\]]+\\]\\s*=\\s*sc\\.nextInt\\s*\\(\\s*\\)\\s*;`).test(clean);
-          checks.push({
-            ok: hasReadLoop,
-            text: hasReadLoop
-              ? 'Les n heiltölur frá notanda inn í fylkið í lykkju.'
-              : 'Vantar lykkju sem les heiltölur frá notanda inn í fylkið.'
-          });
-
-          const hasRevPrint = new RegExp(`\\bfor\\s*\\([^)]*(?:${arrVar}\\.length|n)\\s*-\\s*1[^)]*;[^)]*>=[\\s\\S]*?0[^)]*;[^)]*--[\\s\\S]*?System\\.out\\.println\\s*\\(\\s*${arrVar}\\s*\\[`).test(clean);
-          checks.push({
-            ok: hasRevPrint,
-            text: hasRevPrint
-              ? 'Fer aftur á bak yfir fylkið og prentar hvert stak út.'
-              : 'Vantar seinni lykkju sem telur niður frá enda fylkisins að 0 og prentar stökin út.'
-          });
-
-          basic.forEach(msg => checks.push({ ok: false, text: msg }));
-          const passed = checks.every(c => c.ok);
-          return {
-            passed,
-            checks,
-            summary: passed
-              ? 'Til hamingju! Þú ert komin(n) í gegnum allan Kafla 2!'
-              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
-          };
-        }
-      },
 
           const hasDecl = /\bint\s*\[\s*\]\s+einkunnir\s*=/.test(clean) || /\bint\s+einkunnir\s*\[\s*\]\s*=/.test(clean);
           checks.push({
@@ -6132,7 +5268,7 @@ public static void main(String[] args) {
         explanation: 'Að geta skrifað hreina meðaltalsaðferð á <code class="code-font">int[]</code> er mjög gagnlegt í prófdæmum.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+double\s+medaltalFylkis\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
           const hasSum = /(\+=|=\s*[a-zA-Z_]\w*\s*\+)/.test(clean);
@@ -6320,7 +5456,7 @@ System.out.println(matarsumma);`,
         explanation: 'Rétt eins og <code class="code-font">finnaMax</code>, bara með samanburðinum <code class="code-font">&lt;</code> í stað <code class="code-font">&gt;</code>.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+finnaMin\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasInit = /(int\s+[a-zA-Z_]\w*\s*=\s*[a-zA-Z_]\w*\s*\[\s*0\s*\]|Integer\.MAX_VALUE)/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -6477,7 +5613,7 @@ public static void main(String[] args) {
         explanation: 'Þessi hjálparaðferð er grunnurinn að mörgum uppflettidæmum í prófum.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+saetiStrengs\s*\(\s*String\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*String\s+[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
           const hasEquals = /\.(equals|equalsIgnoreCase)\s*\(/.test(clean);
@@ -6524,7 +5660,7 @@ public static void main(String[] args) {
         explanation: 'Stutt og skýr talningaraðferð á einvíðu fylki.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+teljaSlettar\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasCounter = /int\s+[a-zA-Z_]\w*\s*=\s*0\s*;/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -6655,7 +5791,7 @@ public static void main(String[] args) {
         explanation: 'Klassísk síun + summun í endurnýtanlegri aðferð.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+summaYfir\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*int\s+[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasSumInit = /int\s+[a-zA-Z_]\w*\s*=\s*0\s*;/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -6701,7 +5837,7 @@ public static void main(String[] args) {
         explanation: 'Skilar nýju fylki án þess að breyta upprunalega fylkinu <code class="code-font">a</code>.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s*\[\s*\]\s+speglaFylki\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasNewArray = /new\s+int\s*\[\s*[a-zA-Z_]\w*\.length\s*\]/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -6748,7 +5884,7 @@ public static void main(String[] args) {
         explanation: 'Gott dæmi um að nota <code class="code-font">.length()</code> á <code class="code-font">String</code>-stök inni í fylki.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+String\s+lengstaOrd\s*\(\s*String\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasInit = /(String\s+[a-zA-Z_]\w*\s*=\s*[a-zA-Z_]\w*\s*\[\s*0\s*\]|int\s+[a-zA-Z_]\w*\s*=\s*0)/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -6862,7 +5998,7 @@ System.out.println(tel);`,
         explanation: 'Að geta lagt saman einn tiltekinn dálk í 2D fylki er mjög algengt prófverkefni.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+summaDalks\s*\(\s*int\s*\[\s*\]\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*int\s+[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasSumInit = /int\s+[a-zA-Z_]\w*\s*=\s*0\s*;/.test(clean);
           const hasRowLoop = /\bfor\s*\([^;]*;[^;]*\.length/.test(clean) || /\bfor\s*\(\s*int\s*\[\s*\]/.test(clean);
@@ -6911,7 +6047,7 @@ System.out.println(tel);`,
         explanation: 'Hrein hámarksleit á tvívíðu fylki.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s+haestaI2D\s*\(\s*int\s*\[\s*\]\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasInit = /(int\s+[a-zA-Z_]\w*\s*=\s*[a-zA-Z_]\w*\s*\[\s*0\s*\]\s*\[\s*0\s*\]|Integer\.MIN_VALUE)/.test(clean);
           const forCount = (clean.match(/\bfor\s*\(/g) || []).length;
@@ -6959,7 +6095,7 @@ System.out.println(tel);`,
         explanation: 'Þetta er í beinum skyldleika við uppflettiaðferðir úr gömlum prófum.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+double\s+finnaVerd\s*\(\s*String\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*double\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*String\s+[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
           const hasEquals = /\.(equals|equalsIgnoreCase)\s*\(/.test(clean);
@@ -7013,7 +6149,7 @@ System.out.println(tel);`,
         explanation: 'Þessi uppbygging er mjög lík því að reikna út kolefnisspor eða ferðakostnað í prófdæmi!',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+double\s+heildarKostnadur\s*\(\s*String\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*double\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*String\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasTotalInit = /double\s+[a-zA-Z_]\w*\s*=\s*0(?:\.0)?\s*;/.test(clean);
           const hasLoop = /\b(for|while)\s*\(/.test(clean);
@@ -7063,7 +6199,7 @@ System.out.println(tel);`,
         explanation: 'Að skila einvíðu samantektarfylki úr tvívíðu fylki er mjög algengt í gagnagreiningardæmum.',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s*\[\s*\]\s+summaHverrarRadar\s*\(\s*int\s*\[\s*\]\s*\[\s*\]\s*[a-zA-Z_]\w*\s*\)/.test(clean);
           const hasNewArray = /new\s+int\s*\[\s*[a-zA-Z_]\w*\.length\s*\]/.test(clean);
           const forCount = (clean.match(/\bfor\s*\(/g) || []).length;
@@ -7118,12 +6254,12 @@ System.out.println(tel);`,
         explanation: 'Til hamingju! Nú hefur þú lokið öllum köflunum í Hluta 2 (aðferðum, einvíðum fylkjum, tvívíðum fylkjum og samsettum prófdæmum)!',
         validateCode(rawCode) {
           const clean = stripJavaComments(rawCode);
-          const syntaxOk = checkBasicSyntax(clean);
+          const syntaxOk = checkBasicSyntax(clean).length === 0;
           const hasHeader = /public\s+static\s+int\s*\[\s*\]\s+sjaYfirMorkum\s*\(\s*int\s*\[\s*\]\s*[a-zA-Z_]\w*\s*,\s*int\s+[a-zA-Z_]\w*\s*\)/.test(clean);
           const forCount = (clean.match(/\bfor\s*\(/g) || []).length;
-          const hasNewArray = /new\s+int\s*\[\s*[a-zA-Z_]\w+\s*\]/.test(clean);
+          const hasNewArray = /new\s+int\s*\[\s*[a-zA-Z_]\w*\s*\]/.test(clean);
           const hasStrictGreater = /(>\s*[a-zA-Z_]\w*|<)/.test(clean);
-          const hasAssign = /[a-zA-Z_]\w*\s*\[\s*[a-zA-Z_]\w+(?:\+\+)?\s*\]\s*=/.test(clean);
+          const hasAssign = /[a-zA-Z_]\w*\s*\[\s*[a-zA-Z_]\w*(?:\+\+)?\s*\]\s*=/.test(clean);
           const hasReturn = /\breturn\s+[a-zA-Z_]\w*\s*;/.test(clean);
 
           const checks = [
@@ -7169,7 +6305,10 @@ System.out.println(tel);`,
         streak: 0,
         lastStreakQuestionId: null,
         showBreakBanner: false,
-        lastBreakOfferedAt: 0
+        lastBreakOfferedAt: 0,
+        questionsSinceTip: 0,
+        activeTip: null,
+        lastTipIndex: -1
       };
     }
 
@@ -7651,13 +6790,25 @@ System.out.println(tel);`,
         return;
       }
 
-      const prevQ = QUESTIONS[state.currentQuestionIndex];
-      if (index > state.currentQuestionIndex && prevQ && !state.completedQuestions.has(prevQ.id)) {
+      const prevIndex = state.currentQuestionIndex;
+      const prevQ = QUESTIONS[prevIndex];
+      if (index > prevIndex && prevQ && !state.completedQuestions.has(prevQ.id)) {
         state.streak = 0;
       }
       const nextQ = QUESTIONS[index];
       const movingToNewChapter = nextQ.chapter !== state.currentChapterId;
       state.currentQuestionIndex = index;
+
+      if (index > prevIndex && !movingToNewChapter) {
+        state.questionsSinceTip = (state.questionsSinceTip || 0) + 1;
+        if (state.questionsSinceTip >= 6 && !state.showBreakBanner) {
+          pickNextEncouragementTip();
+        } else {
+          state.activeTip = null;
+        }
+      } else {
+        state.activeTip = null;
+      }
       state.currentChapterId = nextQ.chapter;
       state.chapterQuestionIndex[nextQ.chapter] = index;
       resetQuestionUiState(nextQ.id);
@@ -7672,6 +6823,158 @@ System.out.println(tel);`,
       saveProgress();
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+    /*************************************************************************
+     * 8B. HVATNING & HEILRÁÐ FYRIR LOKAPRÓF (18 stutt skilaboð)
+     *************************************************************************/
+    const ENCOURAGEMENT_TIPS = [
+      {
+        category: 'Prófráð',
+        title: 'Skila (return) eða prenta (println)?',
+        text: 'Lestu fyrirmælin alltaf tvisvar: ef beðið er um að aðferð skili gildi á að nota return, en System.out.println aðeins ef beðið er um að prenta á skjáinn.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Stöðug æfing skilar sér',
+        text: 'Hver einasta spurning sem þú leysir styrkir kóðahugsunina. Það sem virkar snúið í dag verður sjálfsagt á prófdegi.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Mörk í fylkjum og strengjum',
+        text: 'Mundu að sæti byrja á 0 og enda á length - 1. Fylki nota a.length (án sviga), en strengir nota s.length() (með svigum).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Rekja kóða á blaði',
+        text: 'Þegar lykkja eða tvívítt fylki ruglar þig, skrifaðu upp litla töflu á blað með gildum breytanna skref fyrir skref. Það kemur í veg fyrir flestar gildrur.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Villur eru besti kennarinn',
+        text: 'Að reka sig á villu núna á æfingu þýðir að þú lendir síður í henni á prófinu sjálfu. Haltu áfram!'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Samanburður strengja',
+        text: 'Í Java ber maður strengi saman með .equals(...) — aldrei með == (nema fyrir frumtög eins og int, double, char og boolean).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Kommutöludeiling',
+        text: 'Ef þú deilir tveimur int-tölum til að fá meðaltal skaltu muna að breyta annarri tölunni í (double) áður en deilt er svo aukastafir glatist ekki.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Þrautseigja í krefjandi dæmum',
+        text: 'Þegar hugtök eins og tilvísanir eða innfelldar lykkjur taka tíma er það merki um að þú sért að læra eitthvað nýtt — ekki gefast upp!'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Prófaðu á 2–3 staka dæmi',
+        text: 'Áður en þú skrifar heila aðferð skaltu prófa hugmyndina á litlu dæmi (t.d. {4, 9} eða tómu fylki) til að sjá hvort mörkin standist.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Stjórnaðu tímanum á prófinu',
+        text: 'Ef eitt dæmi tefur þig of lengi, hoppaðu yfir á næsta, náðu öruggum stigum og komdu síðan aftur með ferskt höfuð.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Smá skref verða að stórum framförum',
+        text: 'Þú þarft ekki að kunna allt í einu. Ein æfing í senn byggir upp öryggið fyrir lokaprófið.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Leit sem skilar -1',
+        text: 'Þegar leitaraðferð skilar sætisnúmeri eða -1 ef ekkert finnst, mundu þá að prófa ix != -1 (ekki ix > 0, því 0 er gilt sæti!).'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Stuttar pásur skipta máli',
+        text: 'Ef einbeitingin dvínar, taktu 3–5 mínútna pásu, teygðu úr þér eða fáðu þér vatnsglas. Heilinn vinnur úr efninu í hvíldinni.'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Þú kannt meira en þú heldur',
+        text: 'Skoðaðu hversu mikið þú hefur þegar náð tökum á. Traustur grunnur í lykkjum og aðferðum fleytir þér langt.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Góður svefn fyrir prófdag',
+        text: 'Að sofa vel nóttina fyrir próf skilar oft meiru en síðbúinn lestur — þreyttur heili gerir óþarfa klaufavillur í svigum og lykkjum.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Gildissending (Pass-by-value)',
+        text: 'Breyting á int-stika inni í aðferð breytir ekki upprunalegu breytunni í main, en breyting á hólfi í fylki (a[0] = ...) helst!'
+      },
+      {
+        category: 'Hvatning',
+        title: 'Skilningur umfram utanbókarlærdóm',
+        text: 'Þegar þú reynir fyrst sjálf(ur) áður en þú skoðar vísbendingu festist þekkingin miklu betur í minninu.'
+      },
+      {
+        category: 'Prófráð',
+        title: 'Lokaathugun á kóða',
+        text: 'Áður en þú skilar lausn, renndu augunum yfir sviga { }, semíkommur ;, skilatýpu aðferðar og hvort return sé örugglega fyrir utan lykkjuna.'
+      }
+    ];
+
+    function pickNextEncouragementTip() {
+      let nextIdx = Math.floor(Math.random() * ENCOURAGEMENT_TIPS.length);
+      if (ENCOURAGEMENT_TIPS.length > 1 && nextIdx === state.lastTipIndex) {
+        nextIdx = (nextIdx + 1) % ENCOURAGEMENT_TIPS.length;
+      }
+      state.lastTipIndex = nextIdx;
+      state.activeTip = ENCOURAGEMENT_TIPS[nextIdx];
+      state.questionsSinceTip = 0;
+    }
+
+    function renderTipBannerHtml() {
+      if (!state.activeTip) return '';
+      const tip = state.activeTip;
+      return `
+        <div id="encouragement-banner" class="mb-4 p-4 rounded-2xl bg-emerald-50/85 border border-emerald-200 flex flex-wrap items-center justify-between gap-3 animate-card">
+          <div class="flex items-start gap-2.5 min-w-0 flex-1">
+            <span class="text-lg shrink-0">💡</span>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Hvatning &amp; Heilráð</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white text-emerald-700 border border-emerald-200">${escapeHtml(tip.category)}</span>
+              </div>
+              <div class="text-sm font-bold text-slate-900 mt-1">${escapeHtml(tip.title)}</div>
+              <p class="text-xs sm:text-sm text-slate-700 mt-0.5 leading-relaxed">${escapeHtml(tip.text)}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 ml-auto">
+            <button id="tip-next-btn" type="button" class="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition">
+              Annað heilráð
+            </button>
+            <button id="tip-dismiss-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+              Halda áfram
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindTipBannerEvents() {
+      const tipDismissBtn = document.getElementById('tip-dismiss-btn');
+      if (tipDismissBtn) {
+        tipDismissBtn.addEventListener('click', () => {
+          state.activeTip = null;
+          render();
+        });
+      }
+      const tipNextBtn = document.getElementById('tip-next-btn');
+      if (tipNextBtn) {
+        tipNextBtn.addEventListener('click', () => {
+          pickNextEncouragementTip();
+          render();
+        });
+      }
     }
 
     /*************************************************************************
@@ -7692,6 +6995,7 @@ System.out.println(tel);`,
     function renderLessonView() {
       const chap = CHAPTERS.find(c => c.id === state.currentChapterId);
       appContainer.innerHTML = `
+        ${renderTipBannerHtml()}
         <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
           <div class="px-6 sm:px-8 pt-6 pb-5 border-b border-slate-100 bg-gradient-to-b from-blue-50/50 to-white">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
@@ -7717,6 +7021,7 @@ System.out.println(tel);`,
         </section>
       `;
 
+      bindTipBannerEvents();
       document.getElementById('start-chapter-btn').addEventListener('click', () => {
         state.seenChapters.add(chap.id);
         state.mode = 'question';
@@ -7964,6 +7269,7 @@ System.out.println(tel);`,
 
       appContainer.innerHTML = `
         ${breakBannerHtml}
+        ${renderTipBannerHtml()}
         <article class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
           <!-- Efri spurningastika -->
           <div class="px-5 sm:px-8 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/60">
@@ -8036,6 +7342,7 @@ System.out.println(tel);`,
       `;
 
       // Tengja viðburði (Event listeners)
+      bindTipBannerEvents();
       const bannerTriviaBtn = document.getElementById('banner-trivia-btn');
       if (bannerTriviaBtn) {
         bannerTriviaBtn.addEventListener('click', () => {
@@ -8370,6 +7677,7 @@ System.out.println(tel);`,
       const pct = Math.round((done / total) * 100);
 
       appContainer.innerHTML = `
+        ${renderTipBannerHtml()}
         <div class="space-y-6 animate-card">
           <!-- Árangurskort -->
           <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
@@ -8496,6 +7804,7 @@ for (int r = 0; r < m.length; r++) {
         });
       });
 
+      bindTipBannerEvents();
       document.getElementById('restart-all-btn').addEventListener('click', () => {
         resetAllProgress();
       });
@@ -9083,6 +8392,11 @@ for (int r = 0; r < m.length; r++) {
     }
 
     document.getElementById('open-bughunt-btn').addEventListener('click', openBugHuntModal);
+    document.getElementById('open-tip-btn').addEventListener('click', () => {
+      pickNextEncouragementTip();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     document.getElementById('close-bughunt-modal-btn').addEventListener('click', closeBugHuntModal);
     document.getElementById('close-bughunt-footer-btn').addEventListener('click', closeBugHuntModal);
     bughuntActionBtn.addEventListener('click', () => {
