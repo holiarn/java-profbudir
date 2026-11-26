@@ -1,0 +1,3655 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Prófbúðir – Hluti 2: Aðferðir, Einvíð fylki og Tvívíð fylki</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter og JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Fínstillt útlit fyrir kóðablokkir, skrun og mjúkar hreyfingar */
+    body {
+      background-color: #F8FAFC;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .code-font {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    }
+
+    /* Mjúk innkoma á kortum */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-card {
+      animation: fadeSlideUp 0.28s ease-out forwards;
+    }
+
+    /* Fínn kóðaritill */
+    textarea.code-editor {
+      tab-size: 4;
+      -moz-tab-size: 4;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    textarea.code-editor:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+      border-color: #2563EB;
+    }
+
+    /* Fela lárétt skrun á kaflastikunni en leyfa mjúka skrunun í síma */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- EFSTA STIKA: Titill, framvindustika og kaflaval -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-2.5">
+      <!-- Hlutaskiptir (Part 1 / Part 2) -->
+      <div class="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-slate-100">
+        <nav class="inline-flex items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200" aria-label="Skipta um hluta">
+          <a href="java_pr_fb_ir_hluti_1.html" class="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
+            Hluti 1: Grunnur &amp; Lykkjur
+          </a>
+          <a href="java_pr_fb_ir_hluti_2.html" aria-current="page" class="px-3 py-1 rounded-lg text-xs font-semibold bg-white text-blue-700 shadow-xs transition">
+            Hluti 2: Aðferðir &amp; Fylki
+          </a>
+        </nav>
+        <div class="flex items-center gap-1.5">
+          <button id="open-trivia-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition inline-flex items-center gap-1" title="Stutt kaffipása með léttum spurningum">
+            <span>☕</span>
+            <span>Kaffipása</span>
+          </button>
+          <button id="open-bughunt-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition inline-flex items-center gap-1" title="Smáleikur: Finndu villuna á 20 sekúndum">
+            <span>🐛</span>
+            <span class="hidden sm:inline">Smáleikur:</span>
+            <span>Villuveiðar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Efri röð: Merki + staða -->
+      <div class="flex items-center justify-between gap-3 mb-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-sm">
+            J2
+          </div>
+          <div class="truncate">
+            <h1 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+              Java Prófbúðir – Hluti 2
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">
+              Aðferðir, einvíð fylki og tvívíð fylki (Ch. 6–8)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="header-streak-pill" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full border transition">Röð: 0 rétt</span>
+          <button id="open-progress-btn" type="button" class="text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 px-3 py-1 rounded-full border border-slate-200 transition flex items-center gap-1.5" title="Skoða framvindu og endurstilla">
+            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Framvinda</span>
+          </button>
+          <span id="header-progress-text" class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+            Skref 1 af 36
+          </span>
+        </div>
+      </div>
+
+      <!-- Framvindustika (Progress Bar) -->
+      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+        <div id="progress-bar-fill" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+      </div>
+
+      <!-- 5 kaflahnappar -->
+      <nav id="chapter-nav" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" aria-label="Kaflayfirlit">
+        <!-- Fyllt út með JavaScript -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- AÐALSVÆÐI -->
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div id="app-container">
+      <!-- Birtir annaðhvort Kennslukort, Spurningu eða Lokaskjá -->
+    </div>
+  </main>
+
+  <!-- FÓTUR -->
+  <footer class="border-t border-slate-200 bg-white py-4 mt-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <span>Java Prófbúðir – Hluti 2 • Venjulegt Java (<code class="code-font text-slate-700">Scanner</code> &amp; <code class="code-font text-slate-700">System.out.println</code>)</span>
+      <span id="footer-score">Rétt svör: 0 / 36</span>
+    </div>
+  </footer>
+
+  <!-- MODAL: Rifja upp kennslukort -->
+  <div id="lesson-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-card max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Kennslukort</span>
+          <h2 id="modal-title" class="text-base sm:text-lg font-bold text-slate-900">Upprifjun</h2>
+        </div>
+        <button id="close-modal-btn" type="button" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition" aria-label="Loka glugga">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="modal-body" class="p-6 overflow-y-auto space-y-4">
+        <!-- Fyllt út með JavaScript -->
+      </div>
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="close-modal-footer-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
+          Aftur í verkefnið
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Framvinduyfirlit og endurstilling -->
+  <div id="progress-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="progress-modal-title">
+    <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-card max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Yfirlit</span>
+          <h2 id="progress-modal-title" class="text-base sm:text-lg font-bold text-slate-900">Framvinda í Hluta 2</h2>
+        </div>
+        <button id="close-progress-modal-btn" type="button" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition" aria-label="Loka glugga">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="progress-modal-body" class="p-6 overflow-y-auto space-y-5">
+        <!-- Fyllt út með JavaScript -->
+      </div>
+      <div id="progress-modal-footer" class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <!-- Fyllt út með JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Kaffipása (Léttar spurningar) -->
+  <div id="trivia-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="trivia-modal-title">
+    <div class="bg-white w-full max-w-lg rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-card max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-amber-50/60">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">☕</span>
+          <h2 id="trivia-modal-title" class="text-base sm:text-lg font-bold text-slate-900">Kaffipása</h2>
+          <span id="trivia-cat-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200"></span>
+        </div>
+        <button id="close-trivia-modal-btn" type="button" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition" aria-label="Loka glugga">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="trivia-modal-body" class="p-6 overflow-y-auto space-y-4">
+        <!-- Fyllt út með JavaScript -->
+      </div>
+      <div id="trivia-modal-footer" class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <span id="trivia-score-text" class="text-xs font-medium text-slate-500"></span>
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="next-trivia-btn" type="button" class="px-3.5 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs sm:text-sm font-semibold hover:bg-amber-100 transition">
+            Næsta spurning
+          </button>
+          <button id="close-trivia-footer-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition">
+            Aftur í námið
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Smáleikur - Villuveiðar á 20 sekúndum -->
+  <div id="bughunt-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="bughunt-modal-title">
+    <div class="bg-white w-full max-w-xl rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-card max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-indigo-50/60">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🐛</span>
+          <h2 id="bughunt-modal-title" class="text-base sm:text-lg font-bold text-slate-900">Villuveiðar á 20 sek.</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="bughunt-timer-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-indigo-200 text-indigo-700">20s</span>
+          <button id="close-bughunt-modal-btn" type="button" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition" aria-label="Loka glugga">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="w-full h-1.5 bg-slate-100 overflow-hidden">
+        <div id="bughunt-timer-bar" class="h-full bg-indigo-600 transition-all duration-100" style="width: 100%;"></div>
+      </div>
+      <div id="bughunt-modal-body" class="p-6 overflow-y-auto space-y-4">
+        <!-- Fyllt út með JavaScript -->
+      </div>
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <span id="bughunt-stats-text" class="text-xs font-medium text-slate-600">Stig: 0 • Met: 0</span>
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="bughunt-action-btn" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition">
+            Næsta þraut
+          </button>
+          <button id="close-bughunt-footer-btn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-100 transition">
+            Loka
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    /*************************************************************************
+     * 1. KENNSLUEFNI: 5 KAFLAR OG KENNSLUKORT
+     *************************************************************************/
+    const CHAPTERS = [
+      {
+        id: 1,
+        shortTitle: '1. Aðferðir (Methods)',
+        title: 'Kafli 1: Aðferðir (Methods)',
+        subtitle: 'Skiptum kóða í endurnýtanlegar einingar með skilagildi, stikum og yfirhleðslu.',
+        firstQuestionIndex: 0,
+        card: {
+          intro: 'Aðferðir (methods) leyfa okkur að brjóta forrit niður í skýrar, endurnýtanlegar einingar sem taka inn gögn (stika) og skila annaðhvort niðurstöðu eða framkvæma aðgerð.',
+          points: [
+            '<strong>Uppbygging aðferðarhauss:</strong> <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">public static &lt;skilatýpa&gt; &lt;nafn&gt;(&lt;stikar&gt;)</code>. Skilatýpan segir hvaða týpu aðferðin skilar (t.d. <code class="code-font">int</code>, <code class="code-font">double</code>, <code class="code-font">boolean</code>, <code class="code-font">String</code>) og stikarnir eru inntaksbreyturnar innan sviganna.',
+            '<strong>Munurinn á <code class="code-font">return</code> og <code class="code-font">void</code>:</strong> <code class="code-font">return</code> sendir gildi til baka til þess sem kallaði á aðferðina (og hættir í aðferðinni strax). <code class="code-font">void</code> þýðir að aðferðin skilar <strong>engu</strong> gildi heldur framkvæmir bara aðgerð (t.d. prentar á skjáinn).',
+            '<strong>Pass-by-value (gildissending):</strong> Frumtög (<code class="code-font">int</code>, <code class="code-font">double</code>, <code class="code-font">boolean</code>, <code class="code-font">char</code>) eru send sem <strong>afrit</strong> inn í aðferð. Breyting á stika inni í aðferð breytir ekki upprunalegu breytunni í <code class="code-font">main</code>.',
+            '<strong>Yfirhleðsla (Overloading):</strong> Tvær eða fleiri aðferðir í sama klasa mega hafa <strong>sama nafn</strong> svo lengi sem stikulistinn (fjöldi eða týpur stika) er ólíkur.'
+          ],
+          codeExample:
+`public static int leggjaSaman(int a, int b) {
+    return a + b;
+}
+
+public static double leggjaSaman(double a, double b) { // yfirhlaðin!
+    return a + b;
+}
+
+public static void heilsa(String nafn) {
+    System.out.println("Halló " + nafn);
+}`,
+          tip: 'Lestu prófspurningar vel: ef beðið er um að aðferð „skili“ gildi áttu að nota return (ekki System.out.println).'
+        }
+      },
+      {
+        id: 2,
+        shortTitle: '2. Einvíð fylki (1D)',
+        title: 'Kafli 2: Einvíð fylki (1D Arrays)',
+        subtitle: 'Geymum mörg gildi af sömu týpu í einu fylki og vinnum með þau í lykkjum.',
+        firstQuestionIndex: 32,
+        card: {
+          intro: 'Fylki (array) geymir fastan fjölda gilda af sömu gagnatýpu í samfelldu minni.',
+          points: [
+            '<strong>Skilgreining og stærð:</strong> <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] a = new int[5];</code> býr til 5 staka fylki (sæti 0 til 4). Einnig má skrifa <code class="code-font">int[] b = {3, 7, 1};</code>.',
+            '<strong>Lengd fylkis:</strong> <code class="code-font">a.length</code> gefur fjölda staka (taktu eftir: <strong>án sviga</strong> á fylkjum, öfugt við <code class="code-font">String.length()</code>!).',
+            '<strong>Aðgengi:</strong> Fyrsta stakið er <code class="code-font">a[0]</code> og síðasta stakið er <code class="code-font">a[a.length - 1]</code>.'
+          ],
+          codeExample:
+`int[] tolur = {10, 20, 30, 40};
+int summa = 0;
+for (int i = 0; i < tolur.length; i++) {
+    summa += tolur[i];
+}`,
+          tip: 'Mundu: a.length er eiginleiki (án sviga), en s.length() á strengjum er aðferð (með svigum).'
+        }
+      },
+      {
+        id: 3,
+        shortTitle: '3. Fylki í aðferðum & Leit',
+        title: 'Kafli 3: Fylki í aðferðum og leit',
+        subtitle: 'Sendum fylki inn í aðferðir, breytum þeim og leitum að gildum.',
+        firstQuestionIndex: 33,
+        card: {
+          intro: 'Þegar fylki er sent inn í aðferð er tilvísunin á fylkið afrituð, svo breytingar á stökum fylkisins inni í aðferðinni sjást líka í main!',
+          points: [
+            '<strong>Fylki sem stiki:</strong> <code class="code-font">public static int finnaMax(int[] a)</code> tekur inn heiltölufylki.',
+            '<strong>Línuleg leit (Linear search):</strong> Rennum í gegnum fylkið með <code class="code-font">for</code>-lykkju og skilum sætinu (<code class="code-font">i</code>) um leið og gildið finnst, eða <code class="code-font">-1</code> ef það finnst ekki.'
+          ],
+          codeExample:
+`public static int leita(int[] a, int x) {
+    for (int i = 0; i < a.length; i++) {
+        if (a[i] == x) return i;
+    }
+    return -1;
+}`,
+          tip: 'Aðferð sem skilar sæti í fylki skilar venjulega -1 ef leitarorðið/talan finnst ekki.'
+        }
+      },
+      {
+        id: 4,
+        shortTitle: '4. Tvívíð fylki (2D)',
+        title: 'Kafli 4: Tvívíð fylki (2D Arrays)',
+        subtitle: 'Töflur og fylki af fylkjum: raðir, dálkar og tvöfaldar lykkjur.',
+        firstQuestionIndex: 34,
+        card: {
+          intro: 'Tvívítt fylki má hugsa sem töflu með röðum og dálkum.',
+          points: [
+            '<strong>Skilgreining:</strong> <code class="code-font">int[][] m = new int[3][4];</code> býr til töflu með 3 röðum og 4 dálkum.',
+            '<strong>Lengdir:</strong> <code class="code-font">m.length</code> er fjöldi raða, og <code class="code-font">m[r].length</code> er fjöldi dálka í röð <code class="code-font">r</code>.',
+            '<strong>Tvöföld lykkja:</strong> Ytri lykkjan fer yfir raðir (<code class="code-font">r</code>) og innri lykkjan yfir dálka (<code class="code-font">c</code>).'
+          ],
+          codeExample:
+`int[][] m = {{1, 2}, {3, 4}};
+for (int r = 0; r < m.length; r++) {
+    for (int c = 0; c < m[r].length; c++) {
+        System.out.print(m[r][c] + " ");
+    }
+}`,
+          tip: 'Fyrri hornalínan í ferningsfylki er m[i][i] og seinni hornalínan er m[i][m.length - 1 - i].'
+        }
+      },
+      {
+        id: 5,
+        shortTitle: '5. Prófdæmi (Samsett)',
+        title: 'Kafli 5: Samsett prófdæmi – Hluti 2',
+        subtitle: 'Lokaverkefni sem sameina aðferðir, einvíð fylki og tvívíð fylki.',
+        firstQuestionIndex: 35,
+        card: {
+          intro: 'Í lokakafla Hluta 2 æfum við stærri prófdæmi sem tengja saman aðferðir, fylki og tvívíð fylki.',
+          points: [
+            '<strong>Skref 1:</strong> Lærðu vel hvort aðferðin eigi að skila nýju fylki, breyta fylkinu á staðnum (<code class="code-font">void</code>) eða skila einni tölu/<code class="code-font">boolean</code>.',
+            '<strong>Skref 2:</strong> Gættu vel að mörkum lykkjanna (<code class="code-font">&lt; a.length</code> og <code class="code-font">&lt; m[r].length</code>).'
+          ],
+          codeExample:
+`public static int summaRadir(int[][] m, int r) {
+    int s = 0;
+    for (int c = 0; c < m[r].length; c++) s += m[r][c];
+    return s;
+}`,
+          tip: 'Prófaðu alltaf hugsunina á litlu 2x2 eða 3-staka dæmi.'
+        }
+      }
+    ];
+
+    /*************************************************************************
+     * 2. HJÁLPARFÖLL FYRIR KÓÐASKOÐARA (SNJÖLL ATHUGUN Á JAVA-KÓÐA)
+     *************************************************************************/
+    function stripJavaComments(code) {
+      return code
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*/g, '');
+    }
+
+    function hasBalancedDelimiters(code) {
+      const stack = [];
+      let inStr = false;
+      let inChar = false;
+      for (let i = 0; i < code.length; i++) {
+        const c = code[i];
+        const prev = i > 0 ? code[i - 1] : '';
+        if (c === '"' && !inChar && prev !== '\\') { inStr = !inStr; continue; }
+        if (c === "'" && !inStr && prev !== '\\') { inChar = !inChar; continue; }
+        if (inStr || inChar) continue;
+        if (c === '(' || c === '{') stack.push(c);
+        else if (c === ')' && stack.pop() !== '(') return false;
+        else if (c === '}' && stack.pop() !== '{') return false;
+      }
+      return stack.length === 0 && !inStr && !inChar;
+    }
+
+    function checkBasicSyntax(cleanCode) {
+      const issues = [];
+      if (!cleanCode.trim()) {
+        issues.push('Kóðareiturinn er tómur. Prófaðu að skrifa lausnina þína.');
+        return issues;
+      }
+      if (!hasBalancedDelimiters(cleanCode)) {
+        issues.push('Athugaðu sviga ( ) og slaufusviga { } — það virðist vanta lokunarsviga eða gæsalappir.');
+      }
+      if (!/;/.test(cleanCode)) {
+        issues.push('Mundu að skipanir í Java þurfa að enda á semíkommu (;).');
+      }
+      return issues;
+    }
+
+    /*************************************************************************
+     * 3. ALLAR SPURNINGARNAR (HLUTI 2)
+     *************************************************************************/
+    const QUESTIONS = [
+      // ==================== KAFLI 1: AÐFERÐIR (1 - 32) ====================
+      // --- STIG 1: Grunnhugsun og aðferðarhaus (Q1-Q6) ---
+      {
+        id: 1,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 1: Aðferðarhaus',
+        title: 'Tilgangur aðferða (methods)',
+        promptHtml: 'Hver er helsti tilgangur þess að búa til aðferðir (methods) í Java?',
+        options: [
+          { id: 'a', text: 'Að skipta kóða í endurnýtanlegar, skýrar einingar sem leysa afmarkað verkefni' },
+          { id: 'b', text: 'Að gera forritið lengra svo það keyri hægar' },
+          { id: 'c', text: 'Að losna við að nota breytur og lykkjur' },
+          { id: 'd', text: 'Að þurfa aldrei að nota main-aðferðina' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Hugsaðu um aðferð eins og lítið verkfæri sem þú getur kallað á aftur og aftur.',
+          'Aðferðir koma í veg fyrir að þú þurfir að afrita sama kóðann mörgum sinnum.'
+        ],
+        explanation: 'Aðferðir brjóta flókin vandamál niður í smærri, læsilegar einingar sem auðvelt er að prófa og endurnýta.'
+      },
+      {
+        id: 2,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 1: Aðferðarhaus',
+        title: 'Að finna skilatýpuna',
+        promptHtml: 'Hver er skilatýpan (return type) í þessum aðferðarhaus?',
+        codeSnippet: `public static int leggjaSaman(int a, int b)`,
+        options: [
+          { id: 'a', text: 'int' },
+          { id: 'b', text: 'leggjaSaman' },
+          { id: 'c', text: 'static' },
+          { id: 'd', text: 'public' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Skilatýpan stendur alltaf BEINT á undan nafni aðferðarinnar.',
+          'Nafnið er leggjaSaman — hvað stendur rétt fyrir framan það?'
+        ],
+        explanation: '<code class="code-font">int</code> er skilatýpan, sem þýðir að aðferðin verður að skila heiltölu (<code class="code-font">int</code>) með <code class="code-font">return</code>.'
+      },
+      {
+        id: 3,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 1: Aðferðarhaus',
+        title: 'Hvað þýðir void?',
+        promptHtml: 'Hvað þýðir lykilorðið <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">void</code> í aðferðarhaus eins og: <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static void prentaLinu()</code>?',
+        options: [
+          { id: 'a', text: 'Aðferðin skilar ENGU gildi til baka' },
+          { id: 'b', text: 'Aðferðin tekur enga stika inn' },
+          { id: 'c', text: 'Aðferðin skilar alltaf tölunni 0' },
+          { id: 'd', text: 'Aðferðin er ólögleg í Java' }
+        ],
+        correctOption: 'a',
+        hints: [
+          '"Void" þýðir tómur / ekkert.',
+          'void-aðferð framkvæmir aðgerð (t.d. prentar texta) án þess að skila gildi með return gildi;.'
+        ],
+        explanation: '<code class="code-font">void</code> segir þýðandanum að aðferðin skili engu gildi. Þess vegna má ekki skrifa <code class="code-font">return 5;</code> í <code class="code-font">void</code>-aðferð.'
+      },
+      {
+        id: 4,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 1: Stikar (Parameters)',
+        title: 'Fjöldi stika í aðferðarhaus',
+        promptHtml: 'Hversu marga stika (parameters) tekur þessi aðferð inn?',
+        codeSnippet: `public static double reiknaVerd(int fjoldi, double einingaverd, boolean afslattur)`,
+        options: [
+          { id: 'a', text: '3' },
+          { id: 'b', text: '1' },
+          { id: 'c', text: '2' },
+          { id: 'd', text: '4' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Stikarnir eru breyturnar inni í sviganum (...), aðskildir með kommu.',
+          'Teldu: (1) fjoldi, (2) einingaverd, (3) afslattur.'
+        ],
+        explanation: 'Aðferðin tekur 3 stika: <code class="code-font">int</code>, <code class="code-font">double</code> og <code class="code-font">boolean</code>. Þegar kallað er á hana þarf að senda 3 gildi í sömu röð og af sömu týpum.'
+      },
+      {
+        id: 5,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Villuleit',
+        stage: 'Stig 1: Villuleit',
+        title: 'Hvað vantar í skilaaðferðina?',
+        promptHtml: 'Hvað veldur þýðingarvillu í þessari aðferð?',
+        codeSnippet:
+`public static int tvofalda(int x) {
+    int svar = x * 2;
+}`,
+        options: [
+          { id: 'a', text: 'Það vantar return-setningu (t.d. return svar;)' },
+          { id: 'b', text: 'Það vantar void fyrir framan tvofalda' },
+          { id: 'c', text: 'x má ekki margfalda með 2' },
+          { id: 'd', text: 'Nafnið svar er bannað í Java' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Aðferðin lofar í hausnum að skila int.',
+          'Ef skilatýpan er ekki void VERÐUR aðferðin að skila gildi með return!'
+        ],
+        explanation: 'Þar sem skilatýpan er <code class="code-font">int</code> krefst þýðandinn þess að aðferðin endi á <code class="code-font">return &lt;heiltala&gt;;</code>.'
+      },
+      {
+        id: 6,
+        chapter: 1,
+        type: 'code',
+        badge: 'Skrifaðu kóða',
+        stage: 'Stig 1: Skrifa fyrstu aðferðina',
+        title: 'Skrifaðu public static int tvofalda(int x)',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static int tvofalda(int x)</code> sem skilar tvöföldu gildi <code class="code-font">x</code>.',
+        starterCode: `// Skrifaðu public static int tvofalda(int x) hér:
+`,
+        modelSolution:
+`public static int tvofalda(int x) {
+    return x * 2;
+}`,
+        hints: [
+          'Hausinn er: public static int tvofalda(int x) {',
+          'Inni í svigunum skrifar þú einfaldlega: return x * 2;'
+        ],
+        explanation: 'Svona lítur hrein og einföld skilaaðferð út í Java!',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+int\s+tvofalda\s*\(\s*int\s+([a-zA-Z_]\w*)\s*\)/);
+          const pName = headerMatch ? headerMatch[1] : 'x';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static int tvofalda(int x).'
+              : 'Vantar réttan aðferðarhaus: public static int tvofalda(int x)'
+          });
+
+          const hasReturn = new RegExp(`\\breturn\\b[^;]*(?:${pName}\\s*\\*\\s*2|2\\s*\\*\\s*${pName}|${pName}\\s*\\+\\s*${pName})\\s*;`).test(clean) ||
+            (/\breturn\b/.test(clean) && new RegExp(`${pName}\\s*\\*\\s*2|2\\s*\\*\\s*${pName}`).test(clean));
+          checks.push({
+            ok: hasReturn,
+            text: hasReturn
+              ? `Skilar tvöföldu gildi ${pName} með return.`
+              : `Vantar að skila tvöföldu gildi stikans með return.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Flott! Fyrsta Java-aðferðin þín er hárrétt.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+
+      // --- STIG 2: Kalla á aðferðir og return vs. println (Q7-Q12) ---
+      {
+        id: 7,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 2: Kalla á aðferð',
+        title: 'Kall á aðferð úr main',
+        promptHtml: 'Hvað prentast út þegar <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">main</code>-aðferðin keyrir?',
+        codeSnippet:
+`public static int tvofalda(int x) {
+    return x * 2;
+}
+
+public static void main(String[] args) {
+    System.out.println(tvofalda(6));
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['12'],
+        hints: [
+          'Kallið tvofalda(6) sendir 6 inn sem x.',
+          'Aðferðin skilar 6 * 2 = 12, sem fer beint inn í System.out.println(...).'
+        ],
+        explanation: '<code class="code-font">tvofalda(6)</code> reiknar út og skilar <code class="code-font">12</code>, og <code class="code-font">println</code> prentar <code class="code-font">12</code>.'
+      },
+      {
+        id: 8,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 2: Nota skilagildi í útreikningi',
+        title: 'Reikna áfram með skilagildi',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static int leggjaSaman(int a, int b) {
+    return a + b;
+}
+
+public static void main(String[] args) {
+    int r = leggjaSaman(3, 4);
+    System.out.println(r * 2);
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['14'],
+        hints: [
+          'Fyrst reiknast leggjaSaman(3, 4) -> skilar 7 í r.',
+          'Síðan prentast r * 2 = 7 * 2.'
+        ],
+        explanation: 'Vegna þess að aðferðin notar <code class="code-font">return</code> (ekki <code class="code-font">println</code>) getum við geymt útkomuna í <code class="code-font">r</code> og reiknað áfram með henni!'
+      },
+      {
+        id: 9,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 2: return vs. println (LYKILATRIÐI!)',
+        title: 'Munurinn á return og println',
+        promptHtml: 'Hver er helsti munurinn á <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">return x;</code> og <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">System.out.println(x);</code> inni í aðferð?',
+        options: [
+          { id: 'a', text: 'return sendir gildið til baka til þess sem kallaði á aðferðina, en println birtir bara texta á skjánum' },
+          { id: 'b', text: 'Þau gera nákvæmlega það sama' },
+          { id: 'c', text: 'println skilar alltaf int en return skilar alltaf String' },
+          { id: 'd', text: 'return má bara nota í main-aðferðinni' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Á prófum biðja dæmi oft um að aðferð "skili" (return) gildi — þá á EKKI bara að prenta það!',
+          'Gildi sem er prentað hverfur á skjáinn, en gildi sem er skilað með return má nota í öðrum útreikningum.'
+        ],
+        explanation: 'Mjög algeng prófvilla er að prenta þegar beðið er um að skila. Lestu alltaf vel hvort dæmið segi "skilar" (<code class="code-font">return</code>) eða "prentar" (<code class="code-font">println</code>).'
+      },
+      {
+        id: 10,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Villuleit',
+        stage: 'Stig 2: Gildra með void',
+        title: 'Að reyna að vista niðurstöðu úr void-aðferð',
+        promptHtml: 'Gefin er aðferðin <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static void prentaHae() { System.out.println("Hae"); }</code>. Hvað gerist ef við skrifum <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">String s = prentaHae();</code> í main?',
+        options: [
+          { id: 'a', text: 'Þýðingarvilla (void-aðferð skilar engu gildi sem hægt er að setja í breytu)' },
+          { id: 'b', text: 's fær gildið "Hae"' },
+          { id: 'c', text: 's fær gildið ""' },
+          { id: 'd', text: 'Forritið prentar "Hae" tvisvar' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Skilatýpan á prentaHae() er void — hún skilar ENGU!',
+          'Þú getur ekki sett "ekkert" inn í String-breytu.'
+        ],
+        explanation: 'Á <code class="code-font">void</code>-aðferð kallar maður einfaldlega á sér línu: <code class="code-font">prentaHae();</code> — aldrei hægra megin við <code class="code-font">=</code>.'
+      },
+      {
+        id: 11,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 2: return stoppar aðferðina strax',
+        title: 'Snemmbúið return',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static int profa(int x) {
+    if (x > 5) {
+        return 100;
+    }
+    return 0;
+}
+
+public static void main(String[] args) {
+    System.out.println(profa(8));
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['100'],
+        hints: [
+          'x er 8, svo x > 5 er satt (true).',
+          'Um leið og return 100; keyrir hættir aðferðin STRAX og fer aftur í main!'
+        ],
+        explanation: '<code class="code-font">return</code> lýkur aðferðinni umsvifalaust, svo <code class="code-font">return 0;</code> keyrir aldrei þegar <code class="code-font">x</code> er 8.'
+      },
+      {
+        id: 12,
+        chapter: 1,
+        type: 'code',
+        badge: 'Skrifaðu kóða',
+        stage: 'Stig 2: Skrifa void-aðferð',
+        title: 'void-aðferð sem heilsar',
+        promptHtml: 'Skrifaðu <code class="code-font">void</code>-aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static void heilsa(String nafn)</code> sem prentar út <code class="code-font">"Hae "</code> fylgt af <code class="code-font">nafn</code> (t.d. <code class="code-font">"Hae Anna"</code>).',
+        starterCode: `// Skrifaðu public static void heilsa(String nafn) hér:
+`,
+        modelSolution:
+`public static void heilsa(String nafn) {
+    System.out.println("Hae " + nafn);
+}`,
+        hints: [
+          'Hausinn: public static void heilsa(String nafn) {',
+          'Inni í svigunum: System.out.println("Hae " + nafn);'
+        ],
+        explanation: 'Hér er ekkert <code class="code-font">return</code> því skilatýpan er <code class="code-font">void</code> og aðferðin á bara að prenta.',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+void\s+heilsa\s*\(\s*String\s+([a-zA-Z_]\w*)\s*\)/);
+          const pName = headerMatch ? headerMatch[1] : 'nafn';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static void heilsa(String nafn).'
+              : 'Vantar public static void heilsa(String nafn)'
+          });
+
+          const hasPrint = new RegExp(`System\\.out\\.println\\s*\\(\\s*"(?:Hae |Hæ )?"\\s*\\+\\s*${pName}\\s*\\)`).test(clean) ||
+            (/System\.out\.println\s*\(/.test(clean) && /"Hae\s*"/.test(clean) && new RegExp(`\\b${pName}\\b`).test(clean));
+          checks.push({
+            ok: hasPrint,
+            text: hasPrint
+              ? `Prentar út kveðju með nafninu.`
+              : `Vantar útprentun á "Hae " ásamt nafninu.`
+          });
+
+          const hasReturnVal = /\breturn\s+[^;]+;/.test(clean);
+          checks.push({
+            ok: !hasReturnVal,
+            text: !hasReturnVal
+              ? 'Skilar engu gildi (void-aðferð).'
+              : 'void-aðferð má ekki skila gildi með return!'
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Vel gert! void-aðferðin er rétt uppsett.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+
+      // --- STIG 3: Aðferðir með boolean, double og String (Q13-Q18) ---
+      {
+        id: 13,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 3: boolean-aðferð',
+        title: 'Aðferð sem skilar boolean',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static boolean erSlett(int n) {
+    return n % 2 == 0;
+}
+
+public static void main(String[] args) {
+    System.out.println(erSlett(7));
+}`,
+        placeholder: 'true eða false...',
+        acceptedAnswers: ['false'],
+        hints: [
+          '7 % 2 er 1, ekki 0.',
+          'Segðin 1 == 0 metur til false, sem aðferðin skilar.'
+        ],
+        explanation: '<code class="code-font">erSlett(7)</code> skilar <code class="code-font">false</code> og <code class="code-font">main</code> prentar <code class="code-font">false</code>.'
+      },
+      {
+        id: 14,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 3: Hrein boolean-skil',
+        title: 'Einfalda if/else í eina return-línu',
+        promptHtml: 'Hægt er að einfalda þennan kóða í eina línu. Hver er jafngilda einnar-línu útgáfan?',
+        codeSnippet:
+`if (aldur >= 18) {
+    return true;
+} else {
+    return false;
+}`,
+        options: [
+          { id: 'a', text: 'return aldur >= 18;' },
+          { id: 'b', text: 'return aldur = 18;' },
+          { id: 'c', text: 'return boolean;' },
+          { id: 'd', text: 'return true && false;' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Segðin aldur >= 18 er ÞEGAR boolean (true eða false)!',
+          'Þú getur því skilað henni beint með return.'
+        ],
+        explanation: '<code class="code-font">return aldur &gt;= 18;</code> er bæði styttra og læsilegra en <code class="code-font">if (...) return true; else return false;</code>.'
+      },
+      {
+        id: 15,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 3: double-aðferð',
+        title: 'Aðferð sem skilar double',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static double medaltal(int a, int b) {
+    return (a + b) / 2.0;
+}
+
+public static void main(String[] args) {
+    System.out.println(medaltal(3, 4));
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['3.5'],
+        hints: [
+          '(3 + 4) er 7.',
+          '7 / 2.0 er kommutöludeiling (því 2.0 er double) -> 3.5.'
+        ],
+        explanation: 'Aðferðin tekur inn tvær <code class="code-font">int</code>-tölur en skilar nákvæmri <code class="code-font">double</code>-tölu (<code class="code-font">3.5</code>).'
+      },
+      {
+        id: 16,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 3: String-aðferð',
+        title: 'Aðferð sem skilar String',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static String fyrstuTveir(String s) {
+    return s.substring(0, 2);
+}
+
+public static void main(String[] args) {
+    System.out.println(fyrstuTveir("Haskoli"));
+}`,
+        placeholder: 'Skrifaðu texta...',
+        acceptedAnswers: ['Ha', '"Ha"'],
+        hints: [
+          'substring(0, 2) tekur sæti 0 og 1 (ekki 2).',
+          'Fyrstu tveir stafirnir í "Haskoli" eru "Ha".'
+        ],
+        explanation: 'Aðferðin skilar hlutstrengnum <code class="code-font">"Ha"</code> sem <code class="code-font">String</code>.'
+      },
+      {
+        id: 17,
+        chapter: 1,
+        type: 'code',
+        badge: 'Skrifaðu kóða',
+        stage: 'Stig 3: Skrifa boolean-aðferð',
+        title: 'Skrifaðu boolean-aðferðina erJakvaed',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static boolean erJakvaed(int n)</code> sem skilar <code class="code-font">true</code> ef <code class="code-font">n</code> er jákvæð tala (stærri en 0), en annars <code class="code-font">false</code>.',
+        starterCode: `// Skrifaðu public static boolean erJakvaed(int n) hér:
+`,
+        modelSolution:
+`public static boolean erJakvaed(int n) {
+    return n > 0;
+}`,
+        hints: [
+          'Hausinn: public static boolean erJakvaed(int n)',
+          'Inni í henni nægir: return n > 0; (eða if (n > 0) return true; else return false;).'
+        ],
+        explanation: '<code class="code-font">boolean</code>-aðferðir eru frábærar til að gera <code class="code-font">if</code>-skilyrði í <code class="code-font">main</code> mjög skýr, t.d. <code class="code-font">if (erJakvaed(x))</code>.',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+boolean\s+erJakvaed\s*\(\s*int\s+([a-zA-Z_]\w*)\s*\)/);
+          const pName = headerMatch ? headerMatch[1] : 'n';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static boolean erJakvaed(int n).'
+              : 'Vantar public static boolean erJakvaed(int n)'
+          });
+
+          const hasDirect = new RegExp(`\\breturn\\s+${pName}\\s*>\\s*0\\s*;|\\breturn\\s+0\\s*<\\s*${pName}\\s*;`).test(clean);
+          const hasIfElse = new RegExp(`(?:${pName}\\s*>\\s*0|0\\s*<\\s*${pName})`).test(clean) &&
+            /\breturn\s+true\s*;/.test(clean) && /\breturn\s+false\s*;/.test(clean);
+          checks.push({
+            ok: hasDirect || hasIfElse,
+            text: (hasDirect || hasIfElse)
+              ? `Skilar réttu sannleiksgildi eftir því hvort talan sé jákvæð.`
+              : `Vantar að skila sannleiksgildi fyrir jákvæða tölu.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Flott! Boolean-aðferðin er hrein og rétt.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+      {
+        id: 18,
+        chapter: 1,
+        type: 'code',
+        badge: 'Skrifaðu kóða',
+        stage: 'Stig 3: Skrifa double-aðferð',
+        title: 'Flatarmál rétthyrnings',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static double flatarmal(double breidd, double haed)</code> sem skilar flatarmáli rétthyrnings.',
+        starterCode: `// Skrifaðu public static double flatarmal(double breidd, double haed) hér:
+`,
+        modelSolution:
+`public static double flatarmal(double breidd, double haed) {
+    return breidd * haed;
+}`,
+        hints: [
+          'Báðir stikarnir eru double og skilatýpan er double.',
+          'Skilaðu breidd * haed með return.'
+        ],
+        explanation: 'Svona aðferð er beint í anda Rectangle.java úr 6. kafla námskeiðsins!',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+double\s+flatarmal\s*\(\s*double\s+([a-zA-Z_]\w*)\s*,\s*double\s+([a-zA-Z_]\w*)\s*\)/);
+          const p1 = headerMatch ? headerMatch[1] : 'breidd';
+          const p2 = headerMatch ? headerMatch[2] : 'haed';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static double flatarmal(double breidd, double haed).'
+              : 'Vantar public static double flatarmal(double breidd, double haed)'
+          });
+
+          const hasReturn = new RegExp(`\\breturn\\b[^;]*(?:${p1}\\s*\\*\\s*${p2}|${p2}\\s*\\*\\s*${p1})`).test(clean);
+          checks.push({
+            ok: hasReturn,
+            text: hasReturn
+              ? `Skilar flatarmálinu úr aðferðinni.`
+              : `Vantar að skila margfeldi breiddar og hæðar.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Vel gert! Flatarmálsaðferðin er alveg rétt.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+
+      // --- STIG 4: Pass-by-value og gildissvið breyta (Scope) (Q19-Q24) ---
+      {
+        id: 19,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 4: Pass-by-value (KLASSÍSK PRÓFGILDRA!)',
+        title: 'Breytist x í main?',
+        promptHtml: 'Hvað prentast út í <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">main</code>? (Passaðu þig vel!)',
+        codeSnippet:
+`public static void breyta(int x) {
+    x = 99;
+}
+
+public static void main(String[] args) {
+    int x = 5;
+    breyta(x);
+    System.out.println(x);
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['5'],
+        commonMistakes: {
+          '99': 'Gildra! Í Java er AFRIT af x sent inn í breyta(x), svo x í main breytist ekki!'
+        },
+        hints: [
+          'Í Java er AFRIT af gildinu 5 sent inn í breyta(int x) (pass-by-value).',
+          'Breytingin x = 99 breytir bara staðbundna afritinu inni í breyta(), EKKI x í main!'
+        ],
+        explanation: 'Mjög mikilvæg regla í Java: frumtög (<code class="code-font">int, double, boolean, char</code>) eru send sem afrit. <code class="code-font">x</code> í <code class="code-font">main</code> helst <code class="code-font">5</code>!'
+      },
+      {
+        id: 20,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 4: Af hverju breyttist x ekki?',
+        title: 'Heitið á gildissendingu í Java',
+        promptHtml: 'Hvað kallast sú regla í Java að afrit af gildinu í breytu sé sent inn í aðferð?',
+        options: [
+          { id: 'a', text: 'Pass-by-value (gildissending)' },
+          { id: 'b', text: 'Pass-by-loop' },
+          { id: 'c', text: 'Overloading' },
+          { id: 'd', text: 'Casting' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Gildið sjálft ("value") er afritað yfir í stikann.',
+          'Á ensku heitir þetta pass-by-value.'
+        ],
+        explanation: 'Java notar alltaf <code class="code-font">pass-by-value</code>. (Í Kafla 3 munum við sjá hvernig það hegðar sér öðruvísi fyrir fylki því gildið þar er tilvísun!)'
+      },
+      {
+        id: 21,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 4: Hvernig uppfærum við x úr main?',
+        title: 'Að vista skilagildið í breytu',
+        promptHtml: 'Ef við viljum raunverulega hækka <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">x</code> í <code class="code-font">main</code> með aðferðinni <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static int haekka(int n) { return n + 1; }</code>, hvernig köllum við á hana?',
+        options: [
+          { id: 'a', text: 'x = haekka(x);' },
+          { id: 'b', text: 'haekka(x);' },
+          { id: 'c', text: 'int haekka(x);' },
+          { id: 'd', text: 'return haekka(x);' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Ef þú skrifar bara haekka(x); er skilagildinu hent!',
+          'Þú verður að vista nýja gildið aftur í x með =.'
+        ],
+        explanation: '<code class="code-font">x = haekka(x);</code> tekur gamla gildið, reiknar <code class="code-font">x + 1</code>, og vistar niðurstöðuna aftur í <code class="code-font">x</code>.'
+      },
+      {
+        id: 22,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 4: Gildissvið (Scope)',
+        title: 'Staðbundnar breytur (Local variables)',
+        promptHtml: 'Ef breytan <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int teljari = 0;</code> er skilgreind inni í aðferðinni <code class="code-font">a()</code>, hvað gerist ef <code class="code-font">main()</code> reynir að prenta <code class="code-font">teljari</code>?',
+        options: [
+          { id: 'a', text: 'Þýðingarvilla — teljari er bara sýnileg inni í a() (local variable)' },
+          { id: 'b', text: 'main() prentar 0' },
+          { id: 'c', text: 'main() prentar null' },
+          { id: 'd', text: 'teljari verður sjálfkrafa static' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Breyta sem er skilgreind inni í aðferð lifir bara á milli { og } þeirrar aðferðar.',
+          'Aðrar aðferðir "sjá" ekki staðbundnar breytur (local variables).'
+        ],
+        explanation: 'Gildissvið (scope) staðbundinnar breytu nær eingöngu innan þeirrar blokkar <code class="code-font">{ ... }</code> þar sem hún var skilgreind.'
+      },
+      {
+        id: 23,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 4: Aðskilin gildissvið',
+        title: 'Tvær breytur með sama nafni b',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static int reikna(int a) {
+    int b = a + 2;
+    return b;
+}
+
+public static void main(String[] args) {
+    int b = 10;
+    int c = reikna(b);
+    System.out.println(b + c);
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['22'],
+        hints: [
+          'b í main er 10. reikna(10) býr til SÍNA EIGIN breytu b sem verður 12 og skilar 12 í c.',
+          'b í main er enn 10! Hvað er 10 + 12?'
+        ],
+        explanation: '<code class="code-font">b</code> í <code class="code-font">main</code> (10) og <code class="code-font">b</code> í <code class="code-font">reikna</code> (12) eru tvær algjörlega aðskildar breytur. <code class="code-font">10 + 12 = 22</code>.'
+      },
+      {
+        id: 24,
+        chapter: 1,
+        type: 'code',
+        badge: 'Skrifaðu kóða',
+        stage: 'Stig 4: Skrifa max-aðferð',
+        title: 'Stærri af tveimur tölum',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static int staerri(int a, int b)</code> sem skilar stærri tölunni af <code class="code-font">a</code> og <code class="code-font">b</code> (ef þær eru jafnar má skila hvorri sem er).',
+        starterCode: `// Skrifaðu public static int staerri(int a, int b) hér:
+`,
+        modelSolution:
+`public static int staerri(int a, int b) {
+    if (a > b) {
+        return a;
+    } else {
+        return b;
+    }
+}`,
+        hints: [
+          'Notaðu if (a > b) { return a; } else { return b; }',
+          'Þú mátt líka nota Math.max(a, b) ef þú þekkir hana!'
+        ],
+        explanation: 'Klassísk aðferð úr 6. kafla bókarinnar (max-aðferðin).',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+int\s+staerri\s*\(\s*int\s+([a-zA-Z_]\w*)\s*,\s*int\s+([a-zA-Z_]\w*)\s*\)/);
+          const p1 = headerMatch ? headerMatch[1] : 'a';
+          const p2 = headerMatch ? headerMatch[2] : 'b';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static int staerri(int a, int b).'
+              : 'Vantar public static int staerri(int a, int b)'
+          });
+
+          const hasIfMax = new RegExp(`\\b(?:${p1}\\s*[><]=?\\s*${p2}|${p2}\\s*[><]=?\\s*${p1})\\b`).test(clean) &&
+            new RegExp(`\\breturn\\s+${p1}\\s*;`).test(clean) &&
+            new RegExp(`\\breturn\\s+${p2}\\s*;`).test(clean);
+          const hasMathMax = new RegExp(`\\breturn\\s+Math\\.max\\s*\\(\\s*(?:${p1}\\s*,\\s*${p2}|${p2}\\s*,\\s*${p1})\\s*\\)\\s*;`).test(clean);
+          checks.push({
+            ok: hasIfMax || hasMathMax,
+            text: (hasIfMax || hasMathMax)
+              ? `Ber saman ${p1} og ${p2} og skilar stærri tölunni.`
+              : `Vantar samanburð sem skilar stærri tölunni.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Vel gert! Max-aðferðin er alveg rétt.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+
+      // --- STIG 5: Yfirhleðsla (Overloading) og hjálparaðferðir (Q25-Q28) ---
+      {
+        id: 25,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Stig 5: Yfirhleðsla (Method Overloading)',
+        title: 'Hvað er yfirhleðsla aðferða?',
+        promptHtml: 'Hvað þýðir yfirhleðsla aðferða (method overloading) í Java?',
+        options: [
+          { id: 'a', text: 'Tvær eða fleiri aðferðir í sama klasa hafa SAMA nafn en ÓLÍKAN stikulista (fjölda eða týpur stika)' },
+          { id: 'b', text: 'Aðferð sem kallar á sjálfa sig' },
+          { id: 'c', text: 'Aðferð sem er of löng til að þýðast' },
+          { id: 'd', text: 'Tvær aðferðir með ólík nöfn sem gera það sama' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Dæmi: max(int a, int b) og max(double a, double b).',
+          'Java þekkir þær í sundur út frá týpum eða fjölda gilda sem send eru inn.'
+        ],
+        explanation: 'Overloading leyfir sama lýsandi nafnið (t.d. <code class="code-font">summa</code> eða <code class="code-font">max</code>) fyrir ólíkar týpur eða mismarga stika.'
+      },
+      {
+        id: 26,
+        chapter: 1,
+        type: 'mcq',
+        badge: 'Villuleit',
+        stage: 'Stig 5: Overloading gildra!',
+        title: 'Ólík skilatýpa nægir ekki',
+        promptHtml: 'Má hafa báðar þessar aðferðir í sama klasa?',
+        codeSnippet:
+`public static int f(int x) { return x; }
+public static double f(int x) { return x * 1.0; }`,
+        options: [
+          { id: 'a', text: 'Nei — þýðingarvilla! Ólík skilatýpa nægir EKKI til að yfirhlaða; stikulistinn verður að vera ólíkur' },
+          { id: 'b', text: 'Já — Java velur út frá skilatýpunni' },
+          { id: 'c', text: 'Já — ef önnur er neðar í skránni' },
+          { id: 'd', text: 'Já — en bara ef x er 0' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Skoðaðu svigana: báðar taka inn nákvæmlega (int x)!',
+          'Ef einhver kallar á f(5); veit Java ekki hvora aðferðina á að keyra.'
+        ],
+        explanation: 'Mjög algeng prófspurning! Undirskrift aðferðar (method signature) er nafn + stikulisti (ekki skilatýpa).'
+      },
+      {
+        id: 27,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 5: Rakning með yfirhleðslu',
+        title: 'Kalla á yfirhlaðnar aðferðir',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static int summa(int a, int b) {
+    return a + b;
+}
+public static int summa(int a, int b, int c) {
+    return a + b + c;
+}
+
+public static void main(String[] args) {
+    System.out.println(summa(2, 3) + summa(1, 2, 3));
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['11'],
+        hints: [
+          'summa(2, 3) kallar á 2-stika útgáfuna -> 5.',
+          'summa(1, 2, 3) kallar á 3-stika útgáfuna -> 6. Hvað er 5 + 6?'
+        ],
+        explanation: 'Java velur rétta útgáfu sjálfkrafa eftir fjölda stika: <code class="code-font">5 + 6 = 11</code>.'
+      },
+      {
+        id: 28,
+        chapter: 1,
+        type: 'input',
+        badge: 'Kóðarakning',
+        stage: 'Stig 5: Aðferð kallar á aðra aðferð',
+        title: 'Hjálparaðferðir í verki',
+        promptHtml: 'Hvað prentast út?',
+        codeSnippet:
+`public static int margfalda(int a, int b) {
+    return a * b;
+}
+public static int ferningur(int x) {
+    return margfalda(x, x);
+}
+
+public static void main(String[] args) {
+    System.out.println(ferningur(4));
+}`,
+        placeholder: 'Skrifaðu tölu...',
+        acceptedAnswers: ['16'],
+        hints: [
+          'ferningur(4) kallar á margfalda(4, 4).',
+          'margfalda(4, 4) skilar 16 til baka í ferningur, sem skilar 16 í main.'
+        ],
+        explanation: 'Aðferðir geta kallað á aðrar hjálparaðferðir — þannig byggjum við upp stærri forrit úr litlum kubbum.'
+      },
+
+      // --- STIG 6: Samsett kóðaverkefni (Skrifa heilar aðferðir) (Q29-Q32) ---
+      {
+        id: 29,
+        chapter: 1,
+        type: 'code',
+        badge: 'Prófdæmi',
+        stage: 'Stig 6: Aðferð með for-lykkju',
+        title: 'Summa frá 1 til n',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static int summaTil(int n)</code> sem notar <code class="code-font">for</code>-lykkju til að leggja saman heiltölurnar frá <code class="code-font">1</code> til og með <code class="code-font">n</code> og <strong>SKILAR</strong> summunni (ekki prenta!).',
+        starterCode: `// Skrifaðu public static int summaTil(int n) hér:
+`,
+        modelSolution:
+`public static int summaTil(int n) {
+    int summa = 0;
+    for (int i = 1; i <= n; i++) {
+        summa += i;
+    }
+    return summa;
+}`,
+        hints: [
+          'Byrjaðu á: int summa = 0; og notaðu for (int i = 1; i <= n; i++) { summa += i; }',
+          'Mundu að skila niðurstöðunni í lokin með return summa; (fyrir utan lykkjuna!).'
+        ],
+        explanation: 'Svona pakkar þú saman lykkju úr Hluta 1 í endurnýtanlega aðferð!',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+int\s+summaTil\s*\(\s*int\s+([a-zA-Z_]\w*)\s*\)/);
+          const pName = headerMatch ? headerMatch[1] : 'n';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static int summaTil(int n).'
+              : 'Vantar public static int summaTil(int n)'
+          });
+
+          const sumMatch = clean.match(/\bint\s+([a-zA-Z_]\w*)\s*=\s*0\s*;/);
+          const sumVar = sumMatch ? sumMatch[1] : 'summa';
+          checks.push({
+            ok: Boolean(sumMatch),
+            text: sumMatch
+              ? `Upphafsstillir summubreytu (${sumVar} = 0).`
+              : 'Vantar að upphafsstilla summubreytu í 0.'
+          });
+
+          const forMatch = clean.match(new RegExp(`\\bfor\\s*\\(\\s*int\\s+([a-zA-Z_]\\w*)\\s*=\\s*1\\s*;\\s*\\1\\s*(?:<=\\s*${pName}|<\\s*${pName}\\s*\\+\\s*1)\\s*;`));
+          const loopVar = forMatch ? forMatch[1] : 'i';
+          const hasAccum = new RegExp(`\\b${sumVar}\\s*(?:\\+=\\s*${loopVar}|=\\s*${sumVar}\\s*\\+\\s*${loopVar}|=\\s*${loopVar}\\s*\\+\\s*${sumVar})\\s*;`).test(clean);
+          checks.push({
+            ok: Boolean(forMatch) && hasAccum,
+            text: (Boolean(forMatch) && hasAccum)
+              ? `Notar for-lykkju frá 1 til ${pName} og leggur saman.`
+              : `Vantar lykkju frá 1 til og með n sem leggur tölurnar saman.`
+          });
+
+          const hasReturn = new RegExp(`\\breturn\\s+${sumVar}\\s*;`).test(clean);
+          checks.push({
+            ok: hasReturn,
+            text: hasReturn
+              ? `Skilar ${sumVar} með return.`
+              : `Vantar að skila summunni úr aðferðinni.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Flott! Þú pakkaðir lykkjunni inn í hreina skilaaðferð.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+      {
+        id: 30,
+        chapter: 1,
+        type: 'code',
+        badge: 'Prófdæmi',
+        stage: 'Stig 6: Aðferð sem telur staf í streng',
+        title: 'teljaStaf(String s, char c)',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static int teljaStaf(String s, char c)</code> sem telur hversu oft stafurinn <code class="code-font">c</code> kemur fyrir í strengnum <code class="code-font">s</code> og skilar fjöldanum.',
+        starterCode: `// Skrifaðu public static int teljaStaf(String s, char c) hér:
+`,
+        modelSolution:
+`public static int teljaStaf(String s, char c) {
+    int teljari = 0;
+    for (int i = 0; i < s.length(); i++) {
+        if (s.charAt(i) == c) {
+            teljari++;
+        }
+    }
+    return teljari;
+}`,
+        hints: [
+          'Búðu til int teljari = 0; og farðu yfir s með for (int i = 0; i < s.length(); i++).',
+          'Ef s.charAt(i) == c, hækkaðu teljari++. Skilaðu svo teljari.'
+        ],
+        explanation: 'Mjög dæmigert kóðadæmi á rafrænu prófi: fá tvo stika (<code class="code-font">String</code> og <code class="code-font">char</code>) og skila <code class="code-font">int</code>.',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+int\s+teljaStaf\s*\(\s*String\s+([a-zA-Z_]\w*)\s*,\s*char\s+([a-zA-Z_]\w*)\s*\)/);
+          const sName = headerMatch ? headerMatch[1] : 's';
+          const cName = headerMatch ? headerMatch[2] : 'c';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static int teljaStaf(String s, char c).'
+              : 'Vantar public static int teljaStaf(String s, char c)'
+          });
+
+          const forMatch = clean.match(new RegExp(`\\bfor\\s*\\(\\s*int\\s+([a-zA-Z_]\\w*)\\s*=\\s*0\\s*;\\s*\\1\\s*<\\s*${sName}\\.length\\s*\\(\\s*\\)\\s*;`));
+          const loopVar = forMatch ? forMatch[1] : 'i';
+          checks.push({
+            ok: Boolean(forMatch),
+            text: forMatch
+              ? `Fer yfir öll lögleg sæti strengsins.`
+              : `Vantar lykkju yfir alla stafi strengsins.`
+          });
+
+          const hasCharCheck = new RegExp(`${sName}\\.charAt\\s*\\(\\s*${loopVar}\\s*\\)\\s*==\\s*${cName}|${cName}\\s*==\\s*${sName}\\.charAt\\s*\\(\\s*${loopVar}\\s*\\)`).test(clean);
+          checks.push({
+            ok: hasCharCheck,
+            text: hasCharCheck
+              ? `Ber saman núverandi staf í strengnum við stafinn sem leitað er að.`
+              : `Vantar skilyrði sem athugar hvort stafurinn passi við leitina.`
+          });
+
+          const cntMatch = clean.match(/\bint\s+([a-zA-Z_]\w*)\s*=\s*0\s*;/);
+          const cntVar = cntMatch ? cntMatch[1] : 'teljari';
+          const hasInc = new RegExp(`\\b${cntVar}\\s*(?:\\+\\+|\\+=\\s*1|=\\s*${cntVar}\\s*\\+\\s*1)`).test(clean);
+          const hasReturn = new RegExp(`\\breturn\\s+${cntVar}\\s*;`).test(clean);
+          checks.push({
+            ok: Boolean(cntMatch) && hasInc && hasReturn,
+            text: (Boolean(cntMatch) && hasInc && hasReturn)
+              ? `Telur í ${cntVar} og skilar niðurstöðunni með return.`
+              : 'Vantar teljara sem telur tilvikin og skilar niðurstöðunni.'
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Glæsilegt! Stafatalningaraðferðin virkar fullkomlega.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+      {
+        id: 31,
+        chapter: 1,
+        type: 'code',
+        badge: 'Prófdæmi',
+        stage: 'Stig 6: Aðferð sem snýr streng við',
+        title: 'snuaVid(String s)',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static String snuaVid(String s)</code> sem býr til og <strong>SKILAR</strong> nýjum streng með stöfunum í <code class="code-font">s</code> í öfugri röð (t.d. <code class="code-font">"Java"</code> → <code class="code-font">"avaJ"</code>).',
+        starterCode: `// Skrifaðu public static String snuaVid(String s) hér:
+`,
+        modelSolution:
+`public static String snuaVid(String s) {
+    String ofugt = "";
+    for (int i = s.length() - 1; i >= 0; i--) {
+        ofugt += s.charAt(i);
+    }
+    return ofugt;
+}`,
+        hints: [
+          'Búðu til String ofugt = ""; og notaðu for (int i = s.length() - 1; i >= 0; i--).',
+          'Bættu s.charAt(i) við ofugt og skilaðu return ofugt; í lokin.'
+        ],
+        explanation: 'Aðferð sem skilar nýjum <code class="code-font">String</code> er mjög algeng í strengjavinnsluverkefnum.',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+String\s+snuaVid\s*\(\s*String\s+([a-zA-Z_]\w*)\s*\)/);
+          const sName = headerMatch ? headerMatch[1] : 's';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static String snuaVid(String s).'
+              : 'Vantar public static String snuaVid(String s)'
+          });
+
+          const strMatch = clean.match(/\bString\s+([a-zA-Z_]\w*)\s*=\s*""\s*;/);
+          const outVar = strMatch ? strMatch[1] : 'ofugt';
+          checks.push({
+            ok: Boolean(strMatch),
+            text: strMatch
+              ? `Upphafsstillir tóman streng (${outVar} = "").`
+              : 'Vantar að upphafsstilla tóman streng fyrir niðurstöðuna.'
+          });
+
+          const hasBackLoop = new RegExp(`\\bfor\\s*\\(\\s*int\\s+([a-zA-Z_]\\w*)\\s*=\\s*${sName}\\.length\\s*\\(\\s*\\)\\s*-\\s*1`).test(clean) &&
+            />=\s*0|>\s*-1/.test(clean) &&
+            /--|-=\s*1/.test(clean);
+          const hasFwdPrepend = new RegExp(`\\b${outVar}\\s*=\\s*${sName}\\.charAt\\s*\\([^)]+\\)\\s*\\+\\s*${outVar}`).test(clean);
+          checks.push({
+            ok: (hasBackLoop || hasFwdPrepend) && new RegExp(`${sName}\\.charAt\\s*\\(`).test(clean),
+            text: (hasBackLoop || hasFwdPrepend)
+              ? `Byggir upp strenginn í öfugri röð í lykkju.`
+              : `Vantar lykkju sem fer yfir strenginn í öfugri röð.`
+          });
+
+          const hasReturn = new RegExp(`\\breturn\\s+${outVar}\\s*;`).test(clean);
+          checks.push({
+            ok: hasReturn,
+            text: hasReturn
+              ? `Skilar ${outVar} með return.`
+              : `Vantar að skila öfuga strengnum úr aðferðinni.`
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Vel gert! Strengjasnúningurinn í aðferðinni er réttur.'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+      {
+        id: 32,
+        chapter: 1,
+        type: 'code',
+        badge: 'Prófdæmi (Lokaþraut)',
+        stage: 'Stig 6: Lokaverkefni Kafla 1 (Samhverfu-aðferð)',
+        title: 'erSamhverfur(String s)',
+        promptHtml: 'Skrifaðu aðferðina <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">public static boolean erSamhverfur(String s)</code> sem skilar <code class="code-font">true</code> ef <code class="code-font">s</code> er samhverfur strengur (palindrome, t.d. <code class="code-font">"radar"</code>), en annars <code class="code-font">false</code>.',
+        starterCode: `// Skrifaðu public static boolean erSamhverfur(String s) hér:
+`,
+        modelSolution:
+`public static boolean erSamhverfur(String s) {
+    String ofugt = "";
+    for (int i = s.length() - 1; i >= 0; i--) {
+        ofugt += s.charAt(i);
+    }
+    return s.equals(ofugt);
+}`,
+        hints: [
+          'Einfaldasta leiðin er að snúa s við í String ofugt (eins og í Q31) og skila return s.equals(ofugt);!',
+          'Eða bera saman s.charAt(low) != s.charAt(high) í lykkju og gera return false; strax ef ójafnt, en return true; í lokin.'
+        ],
+        explanation: 'Frábært! Nú kanntu að skrifa heilar, endurnýtanlegar Java-aðferðir — næst tökum við einvíð fylki (Kafla 2)!',
+        validateCode: function (rawCode) {
+          const clean = stripJavaComments(rawCode);
+          const basic = checkBasicSyntax(clean);
+          const checks = [];
+
+          const headerMatch = clean.match(/public\s+static\s+boolean\s+erSamhverfur\s*\(\s*String\s+([a-zA-Z_]\w*)\s*\)/);
+          const sName = headerMatch ? headerMatch[1] : 's';
+          checks.push({
+            ok: Boolean(headerMatch),
+            text: headerMatch
+              ? 'Aðferðarhausinn er réttur: public static boolean erSamhverfur(String s).'
+              : 'Vantar public static boolean erSamhverfur(String s)'
+          });
+
+          const hasLoop = /\b(?:for|while)\s*\(/.test(clean);
+          const hasRevApproach = new RegExp(`${sName}\\.charAt\\s*\\(`).test(clean) && /\.equals\s*\(/.test(clean);
+          const hasTwoPointer = new RegExp(`${sName}\\.charAt\\s*\\([^)]*\\)\\s*!=\\s*${sName}\\.charAt\\s*\\([^)]*\\)`).test(clean);
+          checks.push({
+            ok: hasLoop && (hasRevApproach || hasTwoPointer),
+            text: (hasLoop && (hasRevApproach || hasTwoPointer))
+              ? 'Notar lykkju og samanburð til að athuga samhverfu.'
+              : `Vantar lykkju og samanburð til að athuga hvort strengurinn sé samhverfur.`
+          });
+
+          const hasBoolReturn = /\breturn\s+(?:true|false|[a-zA-Z_]\w*\.equals\s*\([^)]+\))\s*;/.test(clean);
+          checks.push({
+            ok: hasBoolReturn,
+            text: hasBoolReturn
+              ? 'Skilar boolean gildi með return.'
+              : 'Vantar að skila boolean-niðurstöðu úr aðferðinni.'
+          });
+
+          basic.forEach(msg => checks.push({ ok: false, text: msg }));
+          const passed = checks.every(c => c.ok);
+          return {
+            passed,
+            checks,
+            summary: passed
+              ? 'Til hamingju! Þú ert komin(n) í gegnum allan Kafla 1 í Hluta 2!'
+              : 'Skoðaðu atriðin hér að neðan og prófaðu aftur.'
+          };
+        }
+      },
+
+      // ==================== KAFLI 2: EINVÍÐ FYLKI (Placeholder) ====================
+      {
+        id: 33,
+        chapter: 2,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Kafli 2 • Væntanlegt (1/1)',
+        title: 'Lengd einvíðs fylkis',
+        promptHtml: 'Hvernig fær maður fjölda staka í einvíða fylkinu <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] a</code> í Java?',
+        options: [
+          { id: 'a', text: 'a.length' },
+          { id: 'b', text: 'a.length()' },
+          { id: 'c', text: 'a.size()' },
+          { id: 'd', text: 'len(a)' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Á fylkjum er enginn svigi á eftir length.',
+          'a.length() er fyrir String, en a.length fyrir fylki.'
+        ],
+        explanation: 'Rétt! <code class="code-font">a.length</code> (án sviga) skilar stærð fylkisins.'
+      },
+
+      // ==================== KAFLI 3: FYLKI Í AÐFERÐUM & LEIT (Placeholder) ====================
+      {
+        id: 34,
+        chapter: 3,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Kafli 3 • Væntanlegt (1/1)',
+        title: 'Fylki sem stiki í aðferð',
+        promptHtml: 'Ef aðferð tekur inn <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[] a</code> og breytir <code class="code-font">a[0] = 99;</code>, hvað gerist í <code class="code-font">main</code>?',
+        options: [
+          { id: 'a', text: 'a[0] í main verður líka 99 (því fylkjatilvísunin var send)' },
+          { id: 'b', text: 'a[0] í main helst óbreytt' },
+          { id: 'c', text: 'Þýðingarvilla' },
+          { id: 'd', text: 'Fylkið eyðist' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Fylki eru hlutir (reference types) í Java.',
+          'Aðferðin fær afrit af tilvísuninni á sama fylkið í minni.'
+        ],
+        explanation: 'Rétt! Breytingar á stökum fylkis inni í aðferð hafa áhrif á upprunalega fylkið.'
+      },
+
+      // ==================== KAFLI 4: TVÍVÍÐ FYLKI (Placeholder) ====================
+      {
+        id: 35,
+        chapter: 4,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Kafli 4 • Væntanlegt (1/1)',
+        title: 'Fjöldi raða í tvívíðu fylki',
+        promptHtml: 'Ef <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">int[][] m = new int[3][5];</code>, hvað gefur <code class="code-font bg-slate-100 px-1.5 py-0.5 rounded">m.length</code>?',
+        options: [
+          { id: 'a', text: '3 (fjöldi raða)' },
+          { id: 'b', text: '5 (fjöldi dálka)' },
+          { id: 'c', text: '15 (heildarfjöldi hólfa)' },
+          { id: 'd', text: '8' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Tvívítt fylki er fylki af fylkjum.',
+          'm.length gefur fjölda raða, en m[0].length gefur fjölda dálka.'
+        ],
+        explanation: 'Rétt! <code class="code-font">m.length</code> er <code class="code-font">3</code> (fjöldi raða).'
+      },
+
+      // ==================== KAFLI 5: SAMSETT PRÓFDÆMI (Placeholder) ====================
+      {
+        id: 36,
+        chapter: 5,
+        type: 'mcq',
+        badge: 'Hugtak',
+        stage: 'Kafli 5 • Væntanlegt (1/1)',
+        title: 'Aðalhornallína í tvívíðu ferningsfylki',
+        promptHtml: 'Í <code class="code-font">n x n</code> tvívíðu fylki <code class="code-font">m</code>, hvaða hólf mynda aðalhornalínuna (frá efra vinstra horni niður í neðra hægra)?',
+        options: [
+          { id: 'a', text: 'm[i][i]' },
+          { id: 'b', text: 'm[i][0]' },
+          { id: 'c', text: 'm[0][i]' },
+          { id: 'd', text: 'm[i][n]' }
+        ],
+        correctOption: 'a',
+        hints: [
+          'Í aðalhornalínunni er raðnúmerið og dálknúmerið alltaf það sama.',
+          'Dæmi: m[0][0], m[1][1], m[2][2]...'
+        ],
+        explanation: 'Rétt! Hólfin á aðalhornalínunni eru alltaf <code class="code-font">m[i][i]</code>.'
+      }
+    ];
+
+    /*************************************************************************
+     * 4. STAÐA FORRITSINS (STATE) OG VISTUN Í LOCALSTORAGE
+     *************************************************************************/
+    const STORAGE_KEY = 'java_profbudir_hluti2_progress_v1';
+
+    function createInitialState() {
+      return {
+        mode: 'lesson', // 'lesson' | 'question' | 'summary'
+        currentChapterId: 1,
+        currentQuestionIndex: 0,
+        chapterQuestionIndex: {}, // { [chapterId]: questionIndex }
+        seenChapters: new Set([1]),
+        completedQuestions: new Set(), // question ids sem eru rétt leystar
+        attemptedQuestions: new Set(), // question ids sem hafa verið reyndar
+        mistakeQuestions: new Set(),   // question ids þar sem komið hefur villa
+        hintLevels: {},                // { [questionId]: number }
+        selectedOptions: {},           // { [questionId]: optionId }
+        savedInputs: {},               // { [questionId]: string | string[] }
+        hintLevel: 0,                  // 0, 1, 2 fyrir núverandi spurningu
+        selectedOption: null,
+        codeAttempts: {},              // { [questionId]: number }
+        savedCode: {},                 // { [questionId]: string }
+        showModelSolution: false,
+        feedback: null,                // { ok: boolean, html: string, checks?: [], showTrace?: boolean, milestone?: string }
+        streak: 0,
+        lastStreakQuestionId: null,
+        showBreakBanner: false,
+        lastBreakOfferedAt: 0
+      };
+    }
+
+    const state = createInitialState();
+
+    function saveProgress() {
+      try {
+        const payload = {
+          version: 1,
+          mode: state.mode,
+          currentChapterId: state.currentChapterId,
+          currentQuestionIndex: state.currentQuestionIndex,
+          chapterQuestionIndex: state.chapterQuestionIndex,
+          seenChapters: Array.from(state.seenChapters),
+          completedQuestions: Array.from(state.completedQuestions),
+          attemptedQuestions: Array.from(state.attemptedQuestions),
+          mistakeQuestions: Array.from(state.mistakeQuestions),
+          hintLevels: state.hintLevels,
+          selectedOptions: state.selectedOptions,
+          savedInputs: state.savedInputs,
+          codeAttempts: state.codeAttempts,
+          savedCode: state.savedCode
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        // Hunsa villur ef localStorage er lokað eða fullt
+      }
+    }
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return;
+
+        const validChapterIds = new Set(CHAPTERS.map(c => c.id));
+        const validQuestionIds = new Set(QUESTIONS.map(q => q.id));
+
+        if (data.mode === 'lesson' || data.mode === 'question' || data.mode === 'summary') {
+          state.mode = data.mode;
+        }
+        if (typeof data.currentChapterId === 'number' && validChapterIds.has(data.currentChapterId)) {
+          state.currentChapterId = data.currentChapterId;
+        }
+        if (typeof data.currentQuestionIndex === 'number' &&
+            Number.isInteger(data.currentQuestionIndex) &&
+            data.currentQuestionIndex >= 0 &&
+            data.currentQuestionIndex < QUESTIONS.length) {
+          state.currentQuestionIndex = data.currentQuestionIndex;
+          state.currentChapterId = QUESTIONS[state.currentQuestionIndex].chapter;
+        }
+
+        if (data.chapterQuestionIndex && typeof data.chapterQuestionIndex === 'object' && !Array.isArray(data.chapterQuestionIndex)) {
+          const cleanMap = {};
+          Object.keys(data.chapterQuestionIndex).forEach(k => {
+            const cid = Number(k);
+            const idx = data.chapterQuestionIndex[k];
+            if (validChapterIds.has(cid) && typeof idx === 'number' && Number.isInteger(idx) && idx >= 0 && idx < QUESTIONS.length && QUESTIONS[idx].chapter === cid) {
+              cleanMap[cid] = idx;
+            }
+          });
+          state.chapterQuestionIndex = cleanMap;
+        }
+
+        if (Array.isArray(data.seenChapters)) {
+          const seen = data.seenChapters.filter(id => validChapterIds.has(id));
+          if (seen.length > 0) state.seenChapters = new Set(seen);
+        }
+        if (Array.isArray(data.completedQuestions)) {
+          state.completedQuestions = new Set(data.completedQuestions.filter(id => validQuestionIds.has(id)));
+        }
+        if (Array.isArray(data.attemptedQuestions)) {
+          state.attemptedQuestions = new Set(data.attemptedQuestions.filter(id => validQuestionIds.has(id)));
+        }
+        if (Array.isArray(data.mistakeQuestions)) {
+          state.mistakeQuestions = new Set(data.mistakeQuestions.filter(id => validQuestionIds.has(id)));
+        }
+
+        const copyPlainObj = (src) => (src && typeof src === 'object' && !Array.isArray(src)) ? src : {};
+        state.hintLevels = copyPlainObj(data.hintLevels);
+        state.selectedOptions = copyPlainObj(data.selectedOptions);
+        state.savedInputs = copyPlainObj(data.savedInputs);
+        state.codeAttempts = copyPlainObj(data.codeAttempts);
+        state.savedCode = copyPlainObj(data.savedCode);
+
+        const activeQ = QUESTIONS[state.currentQuestionIndex];
+        if (activeQ) {
+          state.hintLevel = Number(state.hintLevels[activeQ.id]) || 0;
+          state.selectedOption = state.selectedOptions[activeQ.id] || null;
+        }
+      } catch (e) {
+        // Ef vistuð gögn eru skemmd, byrja á hreinni stöðu
+        Object.assign(state, createInitialState());
+      }
+    }
+
+    function resetAllProgress() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        // Hunsa
+      }
+      Object.assign(state, createInitialState());
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /*************************************************************************
+     * 5. DOM ELEMENTAR OG MODAL-STÝRING
+     *************************************************************************/
+    const appContainer = document.getElementById('app-container');
+    const chapterNav = document.getElementById('chapter-nav');
+    const progressText = document.getElementById('header-progress-text');
+    const progressFill = document.getElementById('progress-bar-fill');
+    const footerScore = document.getElementById('footer-score');
+
+    const lessonModal = document.getElementById('lesson-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+
+    const progressModal = document.getElementById('progress-modal');
+    const progressModalBody = document.getElementById('progress-modal-body');
+    const progressModalFooter = document.getElementById('progress-modal-footer');
+    let confirmResetPending = false;
+
+    function openLessonModal(chapterId) {
+      const chap = CHAPTERS.find(c => c.id === chapterId);
+      if (!chap) return;
+      modalTitle.textContent = chap.title;
+      modalBody.innerHTML = renderLessonCardInnerHtml(chap);
+      lessonModal.classList.remove('hidden');
+      lessonModal.classList.add('flex');
+    }
+
+    function closeLessonModal() {
+      lessonModal.classList.add('hidden');
+      lessonModal.classList.remove('flex');
+    }
+
+    function renderProgressModalContent() {
+      const total = QUESTIONS.length;
+      const done = state.completedQuestions.size;
+      const attempted = state.attemptedQuestions.size;
+      const remaining = total - done;
+      const pct = Math.round((done / total) * 100);
+      const accuracyPct = attempted > 0 ? Math.round((done / attempted) * 100) : null;
+
+      progressModalBody.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Leyst rétt</div>
+            <div class="text-xl font-extrabold text-slate-900 mt-0.5">${done} <span class="text-sm font-semibold text-slate-400">/ ${total}</span></div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Reyndar</div>
+            <div class="text-xl font-extrabold text-slate-900 mt-0.5">${attempted} <span class="text-sm font-semibold text-slate-400">/ ${total}</span></div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Nákvæmni</div>
+            <div class="text-xl font-extrabold text-blue-600 mt-0.5">${accuracyPct !== null ? accuracyPct + '%' : '–'}</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Eftir</div>
+            <div class="text-xl font-extrabold text-slate-700 mt-0.5">${remaining}</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+            <span>Heildarframvinda</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Framvinda eftir köflum</h3>
+            <div class="flex items-center gap-3 text-[11px] text-slate-500">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-400 inline-block"></span> Leyst</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-amber-300 inline-block"></span> Reynt</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-slate-200 inline-block"></span> Eftir</span>
+            </div>
+          </div>
+
+          ${CHAPTERS.map(chap => {
+            const qs = QUESTIONS.filter(q => q.chapter === chap.id);
+            const cDone = qs.filter(q => state.completedQuestions.has(q.id)).length;
+            const cAttempted = qs.filter(q => state.attemptedQuestions.has(q.id)).length;
+            const cPct = Math.round((cDone / qs.length) * 100);
+            return `
+              <div class="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="text-sm font-bold text-slate-800">${escapeHtml(chap.shortTitle)}</div>
+                  <div class="text-xs text-slate-500 font-medium">
+                    <span class="text-emerald-700 font-semibold">${cDone} rétt</span> • ${cAttempted} reynd • ${qs.length} samtals (${cPct}%)
+                  </div>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: ${cPct}%;"></div>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-0.5">
+                  ${qs.map((q, localIdx) => {
+                    const globalIdx = QUESTIONS.findIndex(item => item.id === q.id);
+                    const isCurrent = state.mode === 'question' && state.currentQuestionIndex === globalIdx;
+                    const isDone = state.completedQuestions.has(q.id);
+                    const isAtt = state.attemptedQuestions.has(q.id);
+                    let pillCls = 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200';
+                    if (isDone) pillCls = 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200';
+                    else if (isAtt) pillCls = 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200';
+                    if (isCurrent) pillCls += ' ring-2 ring-blue-500 ring-offset-1';
+                    return `<button type="button" data-jump-idx="${globalIdx}" title="Spurning ${localIdx + 1}: ${escapeHtml(q.title)}" class="w-7 h-7 rounded-lg border text-[11px] font-bold transition flex items-center justify-center ${pillCls}">${localIdx + 1}</button>`;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      progressModalBody.querySelectorAll('button[data-jump-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-jump-idx'));
+          closeProgressModal();
+          state.seenChapters.add(QUESTIONS[idx].chapter);
+          goToQuestion(idx);
+        });
+      });
+
+      if (confirmResetPending) {
+        progressModalFooter.innerHTML = `
+          <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-rose-700 font-semibold">
+            <span>Ertu viss um að þú viljir eyða allri framvindu?</span>
+            <button id="confirm-reset-yes-btn" type="button" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition">
+              Já, endurstilla
+            </button>
+            <button id="confirm-reset-no-btn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100 transition">
+              Hætta við
+            </button>
+          </div>
+          <button id="close-progress-footer-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition ml-auto">
+            Loka
+          </button>
+        `;
+        document.getElementById('confirm-reset-yes-btn').addEventListener('click', () => {
+          confirmResetPending = false;
+          closeProgressModal();
+          resetAllProgress();
+        });
+        document.getElementById('confirm-reset-no-btn').addEventListener('click', () => {
+          confirmResetPending = false;
+          renderProgressModalContent();
+        });
+      } else {
+        progressModalFooter.innerHTML = `
+          <button id="request-reset-btn" type="button" class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs sm:text-sm font-semibold hover:bg-rose-100 transition">
+            Endurstilla framvindu
+          </button>
+          <button id="close-progress-footer-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition ml-auto">
+            Loka
+          </button>
+        `;
+        document.getElementById('request-reset-btn').addEventListener('click', () => {
+          confirmResetPending = true;
+          renderProgressModalContent();
+        });
+      }
+
+      document.getElementById('close-progress-footer-btn').addEventListener('click', closeProgressModal);
+    }
+
+    function openProgressModal() {
+      confirmResetPending = false;
+      renderProgressModalContent();
+      progressModal.classList.remove('hidden');
+      progressModal.classList.add('flex');
+    }
+
+    function closeProgressModal() {
+      confirmResetPending = false;
+      progressModal.classList.add('hidden');
+      progressModal.classList.remove('flex');
+    }
+
+    document.getElementById('open-progress-btn').addEventListener('click', openProgressModal);
+    document.getElementById('close-progress-modal-btn').addEventListener('click', closeProgressModal);
+    progressModal.addEventListener('click', (e) => {
+      if (e.target === progressModal) closeProgressModal();
+    });
+
+    document.getElementById('close-modal-btn').addEventListener('click', closeLessonModal);
+    document.getElementById('close-modal-footer-btn').addEventListener('click', closeLessonModal);
+    lessonModal.addEventListener('click', (e) => {
+      if (e.target === lessonModal) closeLessonModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!lessonModal.classList.contains('hidden')) closeLessonModal();
+        if (!progressModal.classList.contains('hidden')) closeProgressModal();
+      }
+    });
+
+    /*************************************************************************
+     * 6. HJÁLPARFÖLL TIL AÐ BIRTA HTML (ÖRYGGI & SNIÐ)
+     *************************************************************************/
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderLessonCardInnerHtml(chap) {
+      return `
+        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">${chap.card.intro}</p>
+        <ul class="space-y-3 my-4">
+          ${chap.card.points.map((pt, idx) => `
+            <li class="flex items-start gap-3 bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-sm text-slate-700 leading-relaxed">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${idx + 1}</span>
+              <div>${pt}</div>
+            </li>
+          `).join('')}
+        </ul>
+        <div class="rounded-xl border border-slate-200 overflow-hidden bg-slate-900 text-slate-100">
+          <div class="px-4 py-2 bg-slate-800 border-b border-slate-700 flex items-center justify-between text-xs text-slate-300 font-medium">
+            <span>Dæmi í Java</span>
+            <span class="font-mono text-slate-400">Main.java</span>
+          </div>
+          <pre class="p-4 text-xs sm:text-sm code-font overflow-x-auto leading-relaxed"><code>${escapeHtml(chap.card.codeExample)}</code></pre>
+        </div>
+        <div class="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm">
+          <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div><strong>Góð ábending:</strong> ${escapeHtml(chap.card.tip)}</div>
+        </div>
+      `;
+    }
+
+    function renderTraceTableHtml(traceTable) {
+      if (!traceTable) return '';
+      return `
+        <div class="mt-4 rounded-xl border border-slate-200 overflow-hidden bg-white">
+          <div class="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+            Skref-fyrir-skref rakningartafla
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-50/70 border-b border-slate-200">
+                  ${traceTable.headers.map(h => `<th class="px-3.5 py-2.5 font-semibold text-slate-700">${escapeHtml(h)}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${traceTable.rows.map(row => `
+                  <tr class="hover:bg-slate-50/60">
+                    ${row.map((cell, idx) => `<td class="px-3.5 py-2 ${idx === 0 ? 'font-mono text-slate-800 font-medium' : 'text-slate-600'}">${escapeHtml(cell)}</td>`).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    /*************************************************************************
+     * 7. UPPFÆRA EFSTU STIKU OG KAFLAHNAPPA
+     *************************************************************************/
+    function renderHeader() {
+      const total = QUESTIONS.length;
+      const done = state.completedQuestions.size;
+      const pct = Math.round((done / total) * 100);
+
+      if (state.mode === 'summary') {
+        progressText.textContent = `Lokið! (${done} / ${total})`;
+        progressFill.style.width = '100%';
+      } else if (state.mode === 'lesson') {
+        progressText.textContent = `Kafli ${state.currentChapterId} • Kennslukort`;
+        progressFill.style.width = `${pct}%`;
+      } else {
+        const qNum = state.currentQuestionIndex + 1;
+        progressText.textContent = `Skref ${qNum} af ${total}`;
+        progressFill.style.width = `${Math.max(pct, Math.round(((qNum - 1) / total) * 100))}%`;
+      }
+
+      footerScore.textContent = `Rétt svör: ${done} / ${total}`;
+
+      const streakPill = document.getElementById('header-streak-pill');
+      if (streakPill) {
+        if (state.streak > 0) {
+          streakPill.classList.remove('hidden');
+          streakPill.textContent = `Röð: ${state.streak} rétt`;
+          if (state.streak >= 3) {
+            streakPill.className = 'text-xs font-semibold px-2.5 py-1 rounded-full border transition bg-amber-50 text-amber-800 border-amber-200';
+          } else {
+            streakPill.className = 'text-xs font-semibold px-2.5 py-1 rounded-full border transition bg-emerald-50 text-emerald-700 border-emerald-200';
+          }
+        } else {
+          streakPill.classList.add('hidden');
+        }
+      }
+
+      // Kaflahnappar
+      chapterNav.innerHTML = CHAPTERS.map(chap => {
+        const chapQuestions = QUESTIONS.filter(q => q.chapter === chap.id);
+        const chapDone = chapQuestions.filter(q => state.completedQuestions.has(q.id)).length;
+        const isComplete = chapDone === chapQuestions.length;
+        const isActive = state.mode !== 'summary' && state.currentChapterId === chap.id;
+
+        let classes = 'px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 border ';
+        if (isActive) {
+          classes += 'bg-blue-50 text-blue-700 border-blue-200 font-semibold';
+        } else if (isComplete) {
+          classes += 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/70';
+        } else {
+          classes += 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+        }
+
+        return `
+          <button type="button" data-chapter="${chap.id}" class="${classes}">
+            ${isComplete ? `<svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>` : ''}
+            <span>${escapeHtml(chap.shortTitle)}</span>
+            <span class="text-[11px] opacity-75">(${chapDone}/${chapQuestions.length})</span>
+          </button>
+        `;
+      }).join('');
+
+      chapterNav.querySelectorAll('button[data-chapter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cid = Number(btn.getAttribute('data-chapter'));
+          goToChapter(cid, true);
+        });
+      });
+    }
+
+    /*************************************************************************
+     * 8. FLAKK Á MILLI SKREFA OG KAFLA
+     *************************************************************************/
+    function resetQuestionUiState(questionId) {
+      state.hintLevel = (questionId && Number(state.hintLevels[questionId])) || 0;
+      state.selectedOption = (questionId && state.selectedOptions[questionId]) || null;
+      state.feedback = null;
+      state.showModelSolution = false;
+    }
+
+    function goToChapter(chapterId, showLessonCardFirst = true) {
+      const chap = CHAPTERS.find(c => c.id === chapterId);
+      if (!chap) return;
+      state.currentChapterId = chapterId;
+      const savedIdx = state.chapterQuestionIndex[chapterId];
+      state.currentQuestionIndex = (typeof savedIdx === 'number' && QUESTIONS[savedIdx] && QUESTIONS[savedIdx].chapter === chapterId)
+        ? savedIdx
+        : chap.firstQuestionIndex;
+      const activeQ = QUESTIONS[state.currentQuestionIndex];
+      resetQuestionUiState(activeQ ? activeQ.id : null);
+
+      if (showLessonCardFirst) {
+        state.mode = 'lesson';
+      } else {
+        state.mode = 'question';
+      }
+      saveProgress();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToQuestion(index) {
+      if (index < 0) return;
+      if (index >= QUESTIONS.length) {
+        state.mode = 'summary';
+        saveProgress();
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const prevQ = QUESTIONS[state.currentQuestionIndex];
+      if (index > state.currentQuestionIndex && prevQ && !state.completedQuestions.has(prevQ.id)) {
+        state.streak = 0;
+      }
+      const nextQ = QUESTIONS[index];
+      const movingToNewChapter = nextQ.chapter !== state.currentChapterId;
+      state.currentQuestionIndex = index;
+      state.currentChapterId = nextQ.chapter;
+      state.chapterQuestionIndex[nextQ.chapter] = index;
+      resetQuestionUiState(nextQ.id);
+
+      if (movingToNewChapter && !state.seenChapters.has(nextQ.chapter)) {
+        state.seenChapters.add(nextQ.chapter);
+        state.mode = 'lesson';
+      } else {
+        state.mode = 'question';
+      }
+
+      saveProgress();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /*************************************************************************
+     * 9. AÐAL-TEIKNIFALL (RENDER)
+     *************************************************************************/
+    function render() {
+      renderHeader();
+      if (state.mode === 'lesson') {
+        renderLessonView();
+      } else if (state.mode === 'question') {
+        renderQuestionView();
+      } else {
+        renderSummaryView();
+      }
+    }
+
+    // --- 9A. KENNSLUKORT Í UPPHAFI KAFLA ---
+    function renderLessonView() {
+      const chap = CHAPTERS.find(c => c.id === state.currentChapterId);
+      appContainer.innerHTML = `
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
+          <div class="px-6 sm:px-8 pt-6 pb-5 border-b border-slate-100 bg-gradient-to-b from-blue-50/50 to-white">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
+              <span>Kennslukort • Kafli ${chap.id} af 5</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">${escapeHtml(chap.title)}</h2>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">${escapeHtml(chap.subtitle)}</p>
+          </div>
+
+          <div class="p-6 sm:p-8 space-y-4">
+            ${renderLessonCardInnerHtml(chap)}
+          </div>
+
+          <div class="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+            <span class="text-xs sm:text-sm text-slate-500">Þú getur alltaf opnað þetta kort aftur í miðju verkefni.</span>
+            <button id="start-chapter-btn" type="button" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.99] transition shadow-xs flex items-center gap-2 shrink-0">
+              <span>Hefja æfingar í Kafla ${chap.id}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </section>
+      `;
+
+      document.getElementById('start-chapter-btn').addEventListener('click', () => {
+        state.seenChapters.add(chap.id);
+        state.mode = 'question';
+        saveProgress();
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    function seededRandom(seed) {
+      let t = seed >>> 0;
+      return function () {
+        t = (t + 0x6D2B79F5) >>> 0;
+        let r = Math.imul(t ^ (t >>> 15), 1 | t);
+        r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function getShuffledOptions(q, questionIndex) {
+      const arr = q.options.slice();
+      const seed = (q.chapter * 10007) ^ ((questionIndex + 1) * 7919) ^ (q.id * 3571);
+      const rand = seededRandom(seed);
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    // --- 9B. SPURNINGASKJÁR ---
+    function renderQuestionView() {
+      const q = QUESTIONS[state.currentQuestionIndex];
+      const chap = CHAPTERS.find(c => c.id === q.chapter);
+      const isSolved = state.completedQuestions.has(q.id);
+
+      // Litur á tegundarmerki (badge)
+      let badgeClasses = 'bg-slate-100 text-slate-700 border-slate-200';
+      if (q.badge.includes('Skrifaðu') || q.badge.includes('Prófdæmi')) {
+        badgeClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+      } else if (q.badge === 'Villuleit') {
+        badgeClasses = 'bg-rose-50 text-rose-700 border-rose-200';
+      } else if (q.badge === 'Kóðarakning') {
+        badgeClasses = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      } else if (q.badge === 'Fylla í eyðu') {
+        badgeClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      }
+
+      // Aðal-innihald eftir spurningartegund
+      let interactionHtml = '';
+
+      if (q.type === 'mcq') {
+        const displayOptions = getShuffledOptions(q, state.currentQuestionIndex);
+        interactionHtml = `
+          <div class="space-y-2.5 mt-5" id="mcq-options">
+            ${displayOptions.map((opt, displayIdx) => {
+              const displayLetter = String.fromCharCode(65 + displayIdx);
+              const isSelected = state.selectedOption === opt.id;
+              let btnClass = 'w-full text-left p-4 rounded-xl border transition flex items-start gap-3 ';
+              if (state.feedback && state.feedback.ok && opt.id === q.correctOption) {
+                btnClass += 'border-emerald-500 bg-emerald-50/70 ring-1 ring-emerald-500';
+              } else if (state.feedback && !state.feedback.ok && isSelected) {
+                btnClass += 'border-rose-400 bg-rose-50/60';
+              } else if (isSelected) {
+                btnClass += 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600';
+              } else {
+                btnClass += 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70';
+              }
+              return `
+                <button type="button" data-option="${opt.id}" class="${btnClass}">
+                  <span class="w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 text-slate-600 bg-white'}">
+                    ${displayLetter}
+                  </span>
+                  <span class="text-sm sm:text-base text-slate-800 leading-snug">${escapeHtml(opt.text)}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else if (q.type === 'input') {
+        const savedVal = typeof state.savedInputs[q.id] === 'string' ? state.savedInputs[q.id] : '';
+        interactionHtml = `
+          <div class="mt-5">
+            <label for="single-answer-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Þitt svar:</label>
+            <input id="single-answer-input" type="text" autocomplete="off"
+              value="${escapeHtml(savedVal)}"
+              placeholder="${escapeHtml(q.placeholder)}"
+              class="w-full sm:w-80 px-4 py-3 rounded-xl border border-slate-300 code-font text-base text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition" />
+          </div>
+        `;
+      } else if (q.type === 'multi-input') {
+        const savedArr = Array.isArray(state.savedInputs[q.id]) ? state.savedInputs[q.id] : [];
+        interactionHtml = `
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            ${q.inputs.map((inp, idx) => `
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <label for="multi-inp-${idx}" class="block text-sm font-semibold code-font text-slate-800 mb-2">${escapeHtml(inp.label)}</label>
+                <input id="multi-inp-${idx}" type="text" autocomplete="off"
+                  value="${escapeHtml(savedArr[idx] || '')}"
+                  placeholder="${escapeHtml(inp.placeholder)}"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-white code-font text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20" />
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'fill-blanks') {
+        const savedArr = Array.isArray(state.savedInputs[q.id]) ? state.savedInputs[q.id] : [];
+        let combined = '';
+        q.templateParts.forEach((part, idx) => {
+          combined += escapeHtml(part);
+          if (idx < q.blanks.length) {
+            const b = q.blanks[idx];
+            combined += `<input id="blank-${idx}" type="text" autocomplete="off" value="${escapeHtml(savedArr[idx] || '')}" placeholder="${escapeHtml(b.placeholder)}" class="${b.width} inline-block mx-1 px-2 py-0.5 rounded-md bg-slate-800 border border-blue-400 text-amber-300 text-center code-font text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />`;
+          }
+        });
+        interactionHtml = `
+          <div class="mt-5 rounded-xl border border-slate-200 overflow-hidden bg-slate-900 text-slate-100">
+            <div class="px-4 py-2 bg-slate-800 border-b border-slate-700 text-xs text-slate-300 font-medium">
+              Fylltu inn í auðu reitina í kóðanum
+            </div>
+            <pre class="p-4 sm:p-5 text-xs sm:text-sm code-font overflow-x-auto leading-loose"><code>${combined}</code></pre>
+          </div>
+        `;
+      } else if (q.type === 'code') {
+        const currentVal = state.savedCode[q.id] !== undefined ? state.savedCode[q.id] : q.starterCode;
+        const attempts = state.codeAttempts[q.id] || 0;
+        interactionHtml = `
+          <div class="mt-5 space-y-3">
+            <div class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-2xs">
+              <div class="px-4 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-slate-700 code-font">Java kóðaritill (Tab setur inndrátt)</span>
+                <button id="reset-code-btn" type="button" class="text-xs font-medium text-slate-500 hover:text-slate-800 transition">
+                  Endurstilla beinagrind
+                </button>
+              </div>
+              ${q.contextBefore ? `
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-xs sm:text-sm code-font text-slate-500 select-none">
+                  ${escapeHtml(q.contextBefore)}
+                </div>
+              ` : ''}
+              <textarea id="java-code-editor" rows="8" spellcheck="false"
+                class="code-editor w-full p-4 bg-white text-slate-900 code-font text-xs sm:text-sm border-0 focus:ring-0">${escapeHtml(currentVal)}</textarea>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button id="toggle-solution-btn" type="button" class="text-xs sm:text-sm font-medium text-slate-600 hover:text-blue-700 underline underline-offset-4 transition">
+                ${state.showModelSolution ? 'Fela fyrirmyndarlausn' : (attempts > 0 ? 'Sýna fyrirmyndarlausn' : 'Festist? Sýna fyrirmyndarlausn')}
+              </button>
+              <span class="text-xs text-slate-400">Athugunin leyfir frjáls bil og breytunöfn.</span>
+            </div>
+
+            ${state.showModelSolution ? `
+              <div class="rounded-xl border border-blue-200 overflow-hidden bg-slate-900 text-slate-100 animate-card">
+                <div class="px-4 py-2 bg-slate-800 border-b border-slate-700 flex items-center justify-between text-xs">
+                  <span class="text-blue-300 font-semibold">Fyrirmyndarlausn</span>
+                  <span class="text-slate-400">Berðu saman við þína lausn</span>
+                </div>
+                <pre class="p-4 text-xs sm:text-sm code-font overflow-x-auto leading-relaxed"><code>${escapeHtml(q.modelSolution)}</code></pre>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // Vísbendingar HTML
+      let hintsHtml = '';
+      if (state.hintLevel > 0) {
+        hintsHtml = `
+          <div class="mt-4 space-y-2 animate-card">
+            ${q.hints.slice(0, state.hintLevel).map((h, i) => `
+              <div class="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm">
+                <span class="px-2 py-0.5 rounded-md bg-amber-200/70 text-amber-900 font-bold text-[11px] shrink-0 mt-0.5">Vísbending ${i + 1}</span>
+                <p class="leading-relaxed">${escapeHtml(h)}</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Endurgjöf HTML
+      let feedbackHtml = '';
+      if (state.feedback) {
+        const ok = state.feedback.ok;
+        feedbackHtml = `
+          <div class="mt-5 p-4 sm:p-5 rounded-xl border animate-card ${ok ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${ok ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">
+                ${ok
+                  ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+                  : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm sm:text-base font-bold ${ok ? 'text-emerald-900' : 'text-rose-900'}">
+                  ${ok ? 'Rétt svar!' : 'Ekki alveg ennþá — prófaðu aftur'}
+                </h3>
+                ${state.feedback.milestone ? `
+                  <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-900 text-xs font-semibold">
+                    <span>${escapeHtml(state.feedback.milestone)}</span>
+                  </div>
+                ` : ''}
+                <div class="text-xs sm:text-sm mt-1 leading-relaxed ${ok ? 'text-emerald-800' : 'text-rose-800'}">
+                  ${state.feedback.html}
+                </div>
+
+                ${state.feedback.checks ? `
+                  <ul class="mt-3 space-y-1.5">
+                    ${state.feedback.checks.map(c => `
+                      <li class="flex items-start gap-2 text-xs sm:text-sm ${c.ok ? 'text-emerald-800' : 'text-rose-800'}">
+                        <span class="font-bold shrink-0">${c.ok ? '✓' : '✗'}</span>
+                        <span>${escapeHtml(c.text)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                ` : ''}
+
+                ${(state.feedback.showTrace && q.traceTable) ? renderTraceTableHtml(q.traceTable) : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const breakBannerHtml = state.showBreakBanner ? `
+        <div id="kaffipasa-banner" class="mb-4 p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex flex-wrap items-center justify-between gap-3 animate-card">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <span class="text-lg shrink-0">☕</span>
+            <div>
+              <div class="text-sm font-bold text-amber-900">Kaffipása! (${state.completedQuestions.size} spurningar leystar)</div>
+              <p class="text-xs text-amber-800 mt-0.5">Viltu taka eina létta spurningu um fótbolta, körfubolta eða bíómyndir áður en þú heldur áfram?</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 ml-auto">
+            <button id="banner-trivia-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition">
+              Svara spurningu
+            </button>
+            <button id="banner-dismiss-btn" type="button" class="px-3 py-1.5 rounded-xl border border-amber-300 bg-white text-amber-900 text-xs font-semibold hover:bg-amber-100 transition">
+              Sleppa og halda áfram
+            </button>
+          </div>
+        </div>
+      ` : '';
+
+      appContainer.innerHTML = `
+        ${breakBannerHtml}
+        <article class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden animate-card">
+          <!-- Efri spurningastika -->
+          <div class="px-5 sm:px-8 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/60">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-slate-400">SPURNING ${state.currentQuestionIndex + 1} / ${QUESTIONS.length}</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClasses}">${escapeHtml(q.badge)}</span>
+              ${q.stage ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">${escapeHtml(q.stage)}</span>` : ''}
+              ${isSolved ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">Lokið ✓</span>' : ''}
+            </div>
+            <button id="open-lesson-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span>Rifja upp kennslukort</span>
+            </button>
+          </div>
+
+          <!-- Aðalefni spurningar -->
+          <div class="p-5 sm:p-8">
+            <div class="text-xs font-medium text-slate-400 mb-1">${escapeHtml(chap.title)}</div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-3">${escapeHtml(q.title)}</h2>
+            <div class="text-sm sm:text-base text-slate-700 leading-relaxed">${q.promptHtml}</div>
+
+            ${q.codeSnippet ? `
+              <div class="mt-4 rounded-xl border border-slate-200 overflow-hidden bg-slate-900 text-slate-100">
+                <pre class="p-4 text-xs sm:text-sm code-font overflow-x-auto leading-relaxed"><code>${escapeHtml(q.codeSnippet)}</code></pre>
+              </div>
+            ` : ''}
+
+            ${interactionHtml}
+            ${hintsHtml}
+            ${feedbackHtml}
+          </div>
+
+          <!-- Neðri aðgerðastika -->
+          <div class="px-5 sm:px-8 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              ${state.currentQuestionIndex > 0 ? `
+                <button id="prev-btn" type="button" class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-100 transition">
+                  ← Fyrra
+                </button>
+              ` : ''}
+
+              ${state.hintLevel < q.hints.length ? `
+                <button id="hint-btn" type="button" class="px-3.5 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-sm font-semibold hover:bg-amber-100 transition flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <span>${state.hintLevel === 0 ? 'Fá vísbendingu' : 'Fá 2. vísbendingu'}</span>
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="flex items-center gap-2.5 ml-auto">
+              <button id="check-btn" type="button" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.99] transition shadow-xs">
+                ${q.type === 'code' ? 'Athuga kóða' : 'Athuga svar'}
+              </button>
+
+              ${(state.feedback && state.feedback.ok) || isSolved ? `
+                <button id="next-btn" type="button" class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 active:scale-[0.99] transition shadow-xs flex items-center gap-1.5">
+                  <span>${state.currentQuestionIndex === QUESTIONS.length - 1 ? 'Sjá samantekt' : 'Næsta skref'}</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </article>
+      `;
+
+      // Tengja viðburði (Event listeners)
+      const bannerTriviaBtn = document.getElementById('banner-trivia-btn');
+      if (bannerTriviaBtn) {
+        bannerTriviaBtn.addEventListener('click', () => {
+          state.showBreakBanner = false;
+          renderQuestionView();
+          openTriviaModal();
+        });
+      }
+      const bannerDismissBtn = document.getElementById('banner-dismiss-btn');
+      if (bannerDismissBtn) {
+        bannerDismissBtn.addEventListener('click', () => {
+          state.showBreakBanner = false;
+          renderQuestionView();
+        });
+      }
+      document.getElementById('open-lesson-btn').addEventListener('click', () => openLessonModal(q.chapter));
+
+      const prevBtn = document.getElementById('prev-btn');
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => goToQuestion(state.currentQuestionIndex - 1));
+      }
+
+      const hintBtn = document.getElementById('hint-btn');
+      if (hintBtn) {
+        hintBtn.addEventListener('click', () => {
+          saveCurrentCodeIfPresent(q);
+          state.hintLevel = Math.min(q.hints.length, state.hintLevel + 1);
+          state.hintLevels[q.id] = state.hintLevel;
+          saveProgress();
+          renderQuestionView();
+        });
+      }
+
+      const nextBtn = document.getElementById('next-btn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => goToQuestion(state.currentQuestionIndex + 1));
+      }
+
+      // MCQ smellir
+      if (q.type === 'mcq') {
+        document.querySelectorAll('#mcq-options button[data-option]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedOption = btn.getAttribute('data-option');
+            state.selectedOptions[q.id] = state.selectedOption;
+            state.feedback = null;
+            saveProgress();
+            renderQuestionView();
+          });
+        });
+      }
+
+      // Enter-lykill og vistun í textareitum
+      if (q.type === 'input') {
+        const inp = document.getElementById('single-answer-input');
+        inp.addEventListener('input', () => {
+          state.savedInputs[q.id] = inp.value;
+          saveProgress();
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') handleCheckAnswer(q);
+        });
+      }
+
+      if (q.type === 'multi-input') {
+        q.inputs.forEach((_, idx) => {
+          const el = document.getElementById(`multi-inp-${idx}`);
+          if (el) {
+            el.addEventListener('input', () => {
+              state.savedInputs[q.id] = q.inputs.map((__, i) => {
+                const f = document.getElementById(`multi-inp-${i}`);
+                return f ? f.value : '';
+              });
+              saveProgress();
+            });
+          }
+        });
+      }
+
+      if (q.type === 'fill-blanks') {
+        q.blanks.forEach((_, idx) => {
+          const el = document.getElementById(`blank-${idx}`);
+          if (el) {
+            el.addEventListener('input', () => {
+              state.savedInputs[q.id] = q.blanks.map((__, i) => {
+                const f = document.getElementById(`blank-${i}`);
+                return f ? f.value : '';
+              });
+              saveProgress();
+            });
+          }
+        });
+      }
+
+      // Kóðaritill: Tab-stuðningur og vistun
+      if (q.type === 'code') {
+        const editor = document.getElementById('java-code-editor');
+        editor.addEventListener('input', () => {
+          state.savedCode[q.id] = editor.value;
+          saveProgress();
+        });
+        editor.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            editor.value = editor.value.substring(0, start) + '    ' + editor.value.substring(end);
+            editor.selectionStart = editor.selectionEnd = start + 4;
+            state.savedCode[q.id] = editor.value;
+            saveProgress();
+          }
+        });
+
+        document.getElementById('reset-code-btn').addEventListener('click', () => {
+          state.savedCode[q.id] = q.starterCode;
+          state.feedback = null;
+          saveProgress();
+          renderQuestionView();
+        });
+
+        document.getElementById('toggle-solution-btn').addEventListener('click', () => {
+          saveCurrentCodeIfPresent(q);
+          state.showModelSolution = !state.showModelSolution;
+          saveProgress();
+          renderQuestionView();
+        });
+      }
+
+      document.getElementById('check-btn').addEventListener('click', () => handleCheckAnswer(q));
+    }
+
+    function saveCurrentCodeIfPresent(q) {
+      if (q.type === 'code') {
+        const editor = document.getElementById('java-code-editor');
+        if (editor) state.savedCode[q.id] = editor.value;
+      }
+    }
+
+    /*************************************************************************
+     * 10. ATHUGUN SVARA
+     *************************************************************************/
+    function recordAnswerOutcome(q, ok) {
+      let milestone = null;
+      if (ok) {
+        if (state.lastStreakQuestionId !== q.id) {
+          state.streak += 1;
+          state.lastStreakQuestionId = q.id;
+          if (state.streak === 3) milestone = '🔥 3 í röð! Góður taktur!';
+          else if (state.streak === 5) milestone = '⭐ 5 í röð! Frábær einbeiting!';
+          else if (state.streak === 10) milestone = '🏆 10 í röð! Óstöðvandi!';
+          else if (state.streak > 10 && state.streak % 5 === 0) milestone = `🏆 ${state.streak} í röð! Glæsilegt!`;
+        }
+        const doneCount = state.completedQuestions.size;
+        if (doneCount > 0 && doneCount % 8 === 0 && state.lastBreakOfferedAt !== doneCount) {
+          state.lastBreakOfferedAt = doneCount;
+          state.showBreakBanner = true;
+        }
+      } else {
+        state.streak = 0;
+        if (state.lastStreakQuestionId === q.id) state.lastStreakQuestionId = null;
+      }
+      return milestone;
+    }
+
+    function handleCheckAnswer(q) {
+      if (q.type === 'mcq') {
+        if (!state.selectedOption) {
+          state.feedback = {
+            ok: false,
+            html: 'Veldu einn af svarmöguleikunum hér að ofan áður en þú smellir á Athuga svar.'
+          };
+          renderQuestionView();
+          return;
+        }
+        state.attemptedQuestions.add(q.id);
+        state.selectedOptions[q.id] = state.selectedOption;
+        const ok = state.selectedOption === q.correctOption;
+        if (ok) {
+          state.completedQuestions.add(q.id);
+        } else {
+          state.mistakeQuestions.add(q.id);
+        }
+        const milestone = recordAnswerOutcome(q, ok);
+        state.feedback = {
+          ok,
+          html: ok
+            ? q.explanation
+            : 'Þessi möguleiki er ekki réttur. Kíktu gjarnan á vísbendingu eða kennslukortið og prófaðu annan valkost!',
+          showTrace: ok,
+          milestone
+        };
+        saveProgress();
+        render();
+        return;
+      }
+
+      if (q.type === 'input') {
+        const inp = document.getElementById('single-answer-input');
+        const rawVal = inp ? inp.value : '';
+        const val = rawVal.trim();
+        if (!val) {
+          state.feedback = { ok: false, html: 'Skrifaðu svar í reitinn áður en þú athugar.' };
+          renderQuestionView();
+          return;
+        }
+        state.savedInputs[q.id] = rawVal;
+        state.attemptedQuestions.add(q.id);
+        const normalized = val.replace(/\s+/g, ' ');
+        const ok = q.acceptedAnswers.some(ans => ans.trim().toLowerCase() === normalized.toLowerCase());
+        const milestone = recordAnswerOutcome(q, ok);
+        if (ok) {
+          state.completedQuestions.add(q.id);
+          state.feedback = { ok: true, html: q.explanation, showTrace: true, milestone };
+        } else {
+          state.mistakeQuestions.add(q.id);
+          const customMsg = q.commonMistakes && q.commonMistakes[normalized];
+          state.feedback = {
+            ok: false,
+            html: customMsg || `Svarið „${escapeHtml(val)}“ er ekki alveg rétt. Prófaðu aftur eða smelltu á „Fá vísbendingu“.`
+          };
+        }
+        saveProgress();
+        render();
+        return;
+      }
+
+      if (q.type === 'multi-input') {
+        const values = q.inputs.map((_, idx) => {
+          const el = document.getElementById(`multi-inp-${idx}`);
+          return el ? el.value.trim() : '';
+        });
+        if (values.some(v => !v)) {
+          state.feedback = { ok: false, html: 'Fylltu út báða reitina áður en þú athugar svarið.' };
+          renderQuestionView();
+          return;
+        }
+        state.savedInputs[q.id] = values;
+        state.attemptedQuestions.add(q.id);
+        const results = q.inputs.map((inp, idx) =>
+          inp.accepted.some(acc => acc === values[idx])
+        );
+        const ok = results.every(Boolean);
+        const milestone = recordAnswerOutcome(q, ok);
+        if (ok) {
+          state.completedQuestions.add(q.id);
+          state.feedback = { ok: true, html: q.explanation, showTrace: true, milestone };
+        } else {
+          state.mistakeQuestions.add(q.id);
+          const wrongParts = [];
+          if (!results[0]) wrongParts.push(`<strong>${escapeHtml(q.inputs[0].label)}</strong>`);
+          if (!results[1]) wrongParts.push(`<strong>${escapeHtml(q.inputs[1].label)}</strong>`);
+          state.feedback = {
+            ok: false,
+            html: `Athugaðu betur ${wrongParts.join(' og ')}. Mundu að stafasæti byrja á 0 og stafir eru háðir hástöfum/lágstöfum!`
+          };
+        }
+        saveProgress();
+        render();
+        // Endurheimta innslegin gildi svo nemandinn sjái hvað hann skrifaði
+        values.forEach((v, idx) => {
+          const el = document.getElementById(`multi-inp-${idx}`);
+          if (el) el.value = v;
+        });
+        return;
+      }
+
+      if (q.type === 'fill-blanks') {
+        const values = q.blanks.map((_, idx) => {
+          const el = document.getElementById(`blank-${idx}`);
+          return el ? el.value.trim() : '';
+        });
+        if (values.some(v => !v)) {
+          state.feedback = { ok: false, html: 'Fylltu inn í allar eyðurnar í kóðanum áður en þú athugar.' };
+          renderQuestionView();
+          values.forEach((v, idx) => {
+            const el = document.getElementById(`blank-${idx}`);
+            if (el) el.value = v;
+          });
+          return;
+        }
+        state.savedInputs[q.id] = values;
+        state.attemptedQuestions.add(q.id);
+        const ok = q.blanks.every((b, idx) => b.accepted.includes(values[idx]));
+        const milestone = recordAnswerOutcome(q, ok);
+        if (ok) {
+          state.completedQuestions.add(q.id);
+          state.feedback = { ok: true, html: q.explanation, milestone };
+        } else {
+          state.mistakeQuestions.add(q.id);
+          state.feedback = {
+            ok: false,
+            html: 'Önnur eða báðar eyðurnar eru ekki alveg réttar. Skoðaðu athugasemdina við línuna eða fáðu vísbendingu!'
+          };
+        }
+        saveProgress();
+        render();
+        values.forEach((v, idx) => {
+          const el = document.getElementById(`blank-${idx}`);
+          if (el) el.value = v;
+        });
+        return;
+      }
+
+      if (q.type === 'code') {
+        const editor = document.getElementById('java-code-editor');
+        const code = editor ? editor.value : '';
+        state.savedCode[q.id] = code;
+        state.codeAttempts[q.id] = (state.codeAttempts[q.id] || 0) + 1;
+        state.attemptedQuestions.add(q.id);
+
+        const res = q.validateCode(code);
+        if (res.passed) {
+          state.completedQuestions.add(q.id);
+        } else {
+          state.mistakeQuestions.add(q.id);
+        }
+        const milestone = recordAnswerOutcome(q, res.passed);
+        state.feedback = {
+          ok: res.passed,
+          html: res.passed ? `${escapeHtml(res.summary)}<div class="mt-2">${q.explanation}</div>` : escapeHtml(res.summary),
+          checks: res.checks,
+          milestone
+        };
+        saveProgress();
+        render();
+      }
+    }
+
+    // --- 9C. LOKASKJÁR: SAMANTEKT OG GLÓSUBLAÐ ---
+    function renderSummaryView() {
+      const done = state.completedQuestions.size;
+      const total = QUESTIONS.length;
+      const pct = Math.round((done / total) * 100);
+
+      appContainer.innerHTML = `
+        <div class="space-y-6 animate-card">
+          <!-- Árangurskort -->
+          <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-6 sm:p-8 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+              <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-3">
+                Hluta 2 lokið!
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Vel gert í Java Prófbúðunum!</h2>
+              <p class="text-blue-100 text-sm sm:text-base mt-2 max-w-2xl">
+                Þú ert búinn að fara í gegnum aðferðir, einvíð fylki, leit í fylkjum, tvívíð fylki og samsett prófdæmi.
+              </p>
+
+              <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/15">
+                  <div class="text-xs text-blue-100">Rétt leyst skref</div>
+                  <div class="text-2xl font-extrabold mt-0.5">${done} / ${total}</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/15">
+                  <div class="text-xs text-blue-100">Árangur</div>
+                  <div class="text-2xl font-extrabold mt-0.5">${pct}%</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/15 col-span-2 sm:col-span-1">
+                  <div class="text-xs text-blue-100">Næsta skref</div>
+                  <div class="text-base font-bold mt-1">Tilbúinn í lokapróf!</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Yfirlit yfir kafla -->
+            <div class="p-6 sm:p-8">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Staða eftir köflum</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${CHAPTERS.map(chap => {
+                  const qs = QUESTIONS.filter(q => q.chapter === chap.id);
+                  const cDone = qs.filter(q => state.completedQuestions.has(q.id)).length;
+                  return `
+                    <button type="button" data-review-chapter="${chap.id}" class="text-left p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition flex items-center justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-bold text-slate-800">${escapeHtml(chap.shortTitle)}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">${cDone} af ${qs.length} skrefum lokið</div>
+                      </div>
+                      <span class="text-xs font-semibold text-blue-600 shrink-0">Æfa →</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </section>
+
+          <!-- GLÓSUBLAÐ FYRIR HLUTA 1 -->
+          <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+              <div>
+                <h3 class="text-xl font-extrabold text-slate-900">Glósublað fyrir Hluta 2</h3>
+                <p class="text-xs sm:text-sm text-slate-500">Öll mikilvægustu kóðamynstrin á einum stað fyrir rafrænt próf.</p>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">Svindlblað til upprifjunar</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Kort 1 -->
+              <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/50">
+                <h4 class="text-sm font-bold text-slate-900 mb-2">1. Aðferðir (Methods)</h4>
+                <pre class="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs code-font overflow-x-auto leading-relaxed"><code>public static int tvofalda(int x) {
+    return x * 2;
+}
+public static void prenta(String s) {
+    System.out.println(s);
+}</code></pre>
+              </div>
+
+              <!-- Kort 2 -->
+              <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/50">
+                <h4 class="text-sm font-bold text-slate-900 mb-2">2. Einvíð fylki (1D Arrays)</h4>
+                <pre class="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs code-font overflow-x-auto leading-relaxed"><code>int[] a = new int[5];
+int[] b = {3, 7, 1, 9};
+for (int i = 0; i < b.length; i++) {
+    summa += b[i];
+}</code></pre>
+              </div>
+
+              <!-- Kort 3 -->
+              <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/50">
+                <h4 class="text-sm font-bold text-slate-900 mb-2">3. Leit og fylki í aðferðum</h4>
+                <pre class="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs code-font overflow-x-auto leading-relaxed"><code>public static int finnaMax(int[] a) {
+    int max = a[0];
+    for (int i = 1; i < a.length; i++) {
+        if (a[i] > max) max = a[i];
+    }
+    return max;
+}</code></pre>
+              </div>
+
+              <!-- Kort 4 -->
+              <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/50">
+                <h4 class="text-sm font-bold text-slate-900 mb-2">4. Tvívíð fylki (2D Arrays)</h4>
+                <pre class="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs code-font overflow-x-auto leading-relaxed"><code>int[][] m = new int[3][4];
+for (int r = 0; r < m.length; r++) {
+    for (int c = 0; c < m[r].length; c++) {
+        summa += m[r][c];
+    }
+}</code></pre>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <a href="java_pr_fb_ir_hluti_1.html" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition inline-flex items-center gap-1.5">
+                  <span>← Til baka í Hluta 1</span>
+                </a>
+                <button id="restart-all-btn" type="button" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-xs">
+                  Byrja aftur frá Kafla 1
+                </button>
+              </div>
+              <span class="text-xs text-slate-500">Þú getur líka smellt á hvaða kaflahnapp sem er efst á síðunni.</span>
+            </div>
+          </section>
+        </div>
+      `;
+
+      document.querySelectorAll('button[data-review-chapter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          goToChapter(Number(btn.getAttribute('data-review-chapter')), true);
+        });
+      });
+
+      document.getElementById('restart-all-btn').addEventListener('click', () => {
+        resetAllProgress();
+      });
+    }
+
+
+    /*************************************************************************
+     * 11. KAFFIPÁSA (TRIVIA) & SMÁLEIKUR (VILLUVEIÐAR Á 20 SEKÚNDUM)
+     *************************************************************************/
+    const FUN_STORAGE_KEY = 'java_profbudir_fun_stats_v1';
+
+    function loadFunStats() {
+      try {
+        const raw = localStorage.getItem(FUN_STORAGE_KEY);
+        if (!raw) return { triviaAnswered: 0, triviaCorrect: 0, bestBugHuntScore: 0 };
+        const d = JSON.parse(raw);
+        return {
+          triviaAnswered: Number(d.triviaAnswered) || 0,
+          triviaCorrect: Number(d.triviaCorrect) || 0,
+          bestBugHuntScore: Number(d.bestBugHuntScore) || 0
+        };
+      } catch (e) {
+        return { triviaAnswered: 0, triviaCorrect: 0, bestBugHuntScore: 0 };
+      }
+    }
+
+    function saveFunStats(stats) {
+      try {
+        localStorage.setItem(FUN_STORAGE_KEY, JSON.stringify(stats));
+      } catch (e) {}
+    }
+
+    const TRIVIA_CARDS = [
+      // Fótbolti (6 Trivial Pursuit fun facts)
+      {
+        category: 'Fótbolti',
+        question: 'Ken Aston, breskur dómari, fann upp gula og rauða spjaldið fyrir HM 1970. Hvaðan fékk hann hugmyndina að litunum tveimur?',
+        options: [
+          'Úr umferðarljósum á meðan hann sat fastur í umferð í London',
+          'Úr litum enska fánans og konungsfjölskyldunnar',
+          'Úr spilastokki sem hann notaði í frístundum',
+          'Úr litum á búningum dómara á þeim tíma'
+        ],
+        correct: 0,
+        fact: 'Eftir tungumálaörðugleika á HM 1966 sat Aston við umferðarljós á Kensington High Street og áttaði sig á að gult (varúð) og rautt (stopp) skildust á öllum tungumálum!'
+      },
+      {
+        category: 'Fótbolti',
+        question: 'Upprunalega HM-styttunni (Jules Rimet bikarnum) var stolið af sýningu í London skömmu fyrir HM 1966. Hver fann bikarinn viku síðar?',
+        options: [
+          'Hundur að nafni Pickles sem var úti að ganga með eiganda sínum og fann hann vafinn í dagblað undir runna',
+          'Rannsóknarlögreglumaður sem fann hann í ferðatösku á Heathrow-flugvelli',
+          'Sjómaður sem fann hann fljótandi í ánni Thames',
+          'Leikmaður enska landsliðsins fann hann í búningsklefa á Wembley'
+        ],
+        correct: 0,
+        fact: 'Pickles varð þjóðhetja í Englandi fyrir vikið og fékk meira að segja að mæta í sigurveislu enska landsliðsins eftir úrslitaleikinn!'
+      },
+      {
+        category: 'Fótbolti',
+        question: 'Áður en vítaspyrnukeppni var tekin upp í stórmótum (eins og á EM 1968), hvernig var skorið úr um sigurvegara þegar leikur endaði með jafntefli eftir framlengingu?',
+        options: [
+          'Með hlutkesti (kastað upp peningi) í búningsklefanum',
+          'Sá sem fékk færri hornspyrnur vann',
+          'Dómarinn valdi það lið sem spilaði fallegri fótbolta',
+          'Liðin spiluðu strax nýjan 90 mínútna leik samdægurs'
+        ],
+        correct: 0,
+        fact: 'Ítalía komst einmitt í úrslitaleik EM 1968 eftir að fyrirliði þeirra giskaði rétt á peningakast gegn Sovétríkjunum!'
+      },
+      {
+        category: 'Fótbolti',
+        question: 'Hver er eini markvörðurinn í sögu fótboltans sem hefur unnið Gullboltann (Ballon d\'Or)?',
+        options: [
+          'Lev Yashin (Sovétríkin)',
+          'Gianluigi Buffon (Ítalía)',
+          'Manuel Neuer (Þýskaland)',
+          'Iker Casillas (Spánn)'
+        ],
+        correct: 0,
+        fact: 'Lev Yashin („Svarti köngulóin“) vann Ballon d\'Or árið 1963 og er enn í dag eini markvörðurinn sem hefur hreppt verðlaunin.'
+      },
+      {
+        category: 'Fótbolti',
+        question: 'Í frægum bikarleik á Madagaskar árið 2002 (AS Adema gegn SO l\'Emyrne) endaði leikurinn 149–0. Hvers vegna skoruðu leikmenn tapliðsins 149 sjálfsmörk viljandi?',
+        options: [
+          'Í mótmælaskyni við dómgæslu í leiknum á undan sem kostaði þá meistaratitilinn',
+          'Vegna þess að markatala réði því hvort liðið kæmist á HM',
+          'Vegna þess að markvörðurinn þeirra meiddist í upphitun',
+          'Vegna þess að liðin höfðu veðjað um hver gæti skorað flest mörk á 10 mínútum'
+        ],
+        correct: 0,
+        fact: 'Leikmenn SO l\'Emyrne byrjuðu á miðju og sparkuðu boltanum beint í eigið mark aftur og aftur allan leikinn á meðan andstæðingarnir stóðu bara og horfðu á!'
+      },
+      {
+        category: 'Fótbolti',
+        question: 'Hvaða regla í fótbolta var innleidd árið 1992 eftir að lið á HM 1990 notuðu hana óspart til að tefja tímann?',
+        options: [
+          'Bannið við því að markvörður taki boltann upp í hendurnar eftir viljandi sendingu frá samherja (back-pass reglan)',
+          'Rangstöðureglan',
+          'Að dómari megi gefa rautt spjald fyrir tæklingu aftan frá',
+          'Að skipta megi inn 3 varamönnum'
+        ],
+        correct: 0,
+        fact: 'Fyrir 1992 gátu varnarmenn endalaust sent boltann til baka á markvörðinn sem greip hann og hélt honum í 6 sekúndur. Reglan gjörbreytti hraða leiksins!'
+      },
+      // Körfubolti (6 Trivial Pursuit fun facts)
+      {
+        category: 'Körfubolti',
+        question: 'Þegar James Naismith fann upp körfubolta árið 1891 notaði hann alvöru ferskjukörfur (peach baskets) sem körfur. Hvað var mest pirrandi við fyrstu leikina?',
+        options: [
+          'Körfurnar voru með lokuðum botni svo einhver þurfti alltaf að klifra upp stiga til að ná boltanum niður eftir hverja körfu',
+          'Körfurnar voru fullar af vatni svo boltinn blotnaði alltaf',
+          'Körfurnar voru festar á hjól og færðust til',
+          'Körfurnar voru minni en boltinn svo hann festist alltaf'
+        ],
+        correct: 0,
+        fact: 'Það liðu nokkur ár áður en einhver fékk þá snjöllu hugmynd að saga botninn úr körfunum svo boltinn dytti bara í gegn!'
+      },
+      {
+        category: 'Körfubolti',
+        question: 'Áður en sérstakur körfubolti var hannaður árið 1894, hvaða bolta notuðu menn í allra fyrstu körfuboltaleikjunum?',
+        options: [
+          'Venjulegan fótbolta',
+          'Keilu-kúlu úr tré',
+          'Tennisbolta',
+          'Handbolta úr leðri'
+        ],
+        correct: 0,
+        fact: 'Árið 1891 var enginn körfubolti til, svo Naismith notaði einfaldlega fótbolta og tvær ferskjukörfur í íþróttahúsi í Springfield, Massachusetts.'
+      },
+      {
+        category: 'Körfubolti',
+        question: 'Hvaða NBA-goðsögn er skuggamyndin (silhouette) í opinbera NBA-merkinu byggð á?',
+        options: [
+          'Jerry West',
+          'Michael Jordan',
+          'Magic Johnson',
+          'Kareem Abdul-Jabbar'
+        ],
+        correct: 0,
+        fact: 'Hönnuðurinn Alan Siegel byggði NBA-merkið árið 1969 á ljósmynd af Jerry West (Los Angeles Lakers) að rekja boltann — þó NBA hafi lengi neitað að staðfesta það opinberlega!'
+      },
+      {
+        category: 'Körfubolti',
+        question: 'Áður en 24-sekúndna skotklukkan (shot clock) var tekin upp í NBA árið 1954 endaði einn leikur (Fort Wayne Pistons gegn Minneapolis Lakers) með ótrúlega lágum stigum. Hver urðu lokatölurnar?',
+        options: [
+          '19–18',
+          '44–42',
+          '31–29',
+          '12–10'
+        ],
+        correct: 0,
+        fact: 'Án skotklukku gat lið sem var yfir einfaldlega haldið boltanum og sent hann sín á milli í margar mínútur án þess að skjóta! 24-sekúndna klukkan bjargaði NBA.'
+      },
+      {
+        category: 'Körfubolti',
+        question: 'Þriggja stiga línan var ekki upprunalega í NBA, heldur var hún gerð vinsæl í samkeppnisdeildinni ABA á 7. og 8. áratugnum. Hvenær tók NBA loksins upp 3-stiga línuna?',
+        options: [
+          'Árið 1979 (fyrir tímabilið 1979–80, sama ár og Magic Johnson og Larry Bird komu inn í deildina)',
+          'Árið 1950',
+          'Árið 1992 með Dream Team',
+          'Árið 1965'
+        ],
+        correct: 0,
+        fact: 'Í upphafi litu margir NBA-þjálfarar á 3-stiga skotið sem „brellu“, en í dag er það orðið mikilvægasta vopnið í leiknum!'
+      },
+      {
+        category: 'Körfubolti',
+        question: 'Wilt Chamberlain skoraði eins og frægt er 100 stig í einum NBA-leik árið 1962. Hvað er sérstakt við upptökur frá þessum sögulega leik?',
+        options: [
+          'Engin sjónvarpsupptaka er til af leiknum — aðeins útvarpslýsing frá 4. leikhluta og ein fræg ljósmynd af honum með blað sem stendur „100“ á',
+          'Leikurinn var sýndur í beinni um allan heim í lit',
+          'Hann skoraði öll 100 stigin með 3-stiga skotum',
+          'Leikurinn fór í fjórfalda framlengingu'
+        ],
+        correct: 0,
+        fact: 'Leikurinn fór fram í Hershey í Pennsylvaníu fyrir framan um 4.000 áhorfendur og var ekki í sjónvarpi, sem gerir hann enn goðsagnakenndari!'
+      },
+      // Kvikmyndir (4 léttar & skemmtilegar fun facts)
+      {
+        category: 'Kvikmyndir',
+        question: 'Í vísindaskáldsögumyndinni The Matrix (1999) sjást grænu táknin renna niður skjáinn. Hvaðan komu táknin í raun og veru?',
+        options: [
+          'Hönnuðurinn skannaði japanskar sushi-uppskriftir úr matreiðslubók konunnar sinnar og speglaði þær',
+          'Þetta var alvöru Java-kóði úr stýrikerfi NASA',
+          'Þetta voru handahófskenndar stærðfræðiformúlur eftir Einstein',
+          'Þetta var dulmál sem leikstjórarnir bjuggu til á 10 árum'
+        ],
+        correct: 0,
+        fact: 'Simon Whiteley hannaði „Matrix-kóðann“ einfaldlega með því að skanna japanska stafi úr sushi-bók og snúa þeim við!'
+      },
+      {
+        category: 'Kvikmyndir',
+        question: 'Hvaða fræga kvikmynd átti upprunalega að heita „Spaceman from Pluto“ samkvæmt tillögu frá yfirmanni hjá kvikmyndaverinu sem fannst upprunalegi titillinn of skrýtinn?',
+        options: [
+          'Back to the Future',
+          'Star Wars',
+          'E.T.',
+          'Toy Story'
+        ],
+        correct: 0,
+        fact: 'Sid Sheinberg hjá Universal sendi bréf og stakk upp á „Spaceman from Pluto“, en Steven Spielberg svaraði kurteislega með því að þakka honum fyrir „frábæra brandarann“ svo hætt var við breytinguna!'
+      },
+      {
+        category: 'Kvikmyndir',
+        question: 'Í myndinni Jurassic Park (1993) bjuggu hljóðhönnuðir til hið fræga öskur í risaeðlunni Tyrannosaurus rex með því að blanda saman dýrahljóðum. Hvaða óvænta dýr var í aðalhlutverki í því hljóði?',
+        options: [
+          'Fílsungi (ásamt tígrisdýri og krókódíl)',
+          'Mörgæs',
+          'Gullfiskur',
+          'Hestur'
+        ],
+        correct: 0,
+        fact: 'Aðalhljóðið í öskri T-Rex var tekið upp af litlum fílsunga, og síðan blandað við urr í krókódíl og tígrisdýri til að gera það ógnvekjandi!'
+      },
+      {
+        category: 'Kvikmyndir',
+        question: 'Hvaða kvikmynd er fyrsta tölvuteiknaða kvikmyndin í fullri lengd (gefin út árið 1995)?',
+        options: [
+          'Toy Story',
+          'Shrek',
+          'Finding Nemo',
+          'The Lion King'
+        ],
+        correct: 0,
+        fact: 'Toy Story frá Pixar árið 1995 markaði tímamót í kvikmyndasögunni sem fyrsta bíómyndin sem var alfarið gerð í tölvu.'
+      }
+    ];
+
+    const triviaModal = document.getElementById('trivia-modal');
+    const triviaModalBody = document.getElementById('trivia-modal-body');
+    const triviaCatBadge = document.getElementById('trivia-cat-badge');
+    const triviaScoreText = document.getElementById('trivia-score-text');
+    let currentTriviaIndex = 0;
+    let triviaAnsweredCurrent = false;
+
+    function renderTriviaCard() {
+      const card = TRIVIA_CARDS[currentTriviaIndex];
+      const stats = loadFunStats();
+      triviaCatBadge.textContent = card.category;
+      triviaScoreText.textContent = `Kaffipásustig: ${stats.triviaCorrect} / ${stats.triviaAnswered}`;
+      triviaAnsweredCurrent = false;
+
+      // Stokka valkosti með slembiröð fyrir þessa opnun
+      const indexedOpts = card.options.map((text, idx) => ({ text, isCorrect: idx === card.correct }));
+      for (let i = indexedOpts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indexedOpts[i], indexedOpts[j]] = [indexedOpts[j], indexedOpts[i]];
+      }
+
+      triviaModalBody.innerHTML = `
+        <p class="text-base font-bold text-slate-900 leading-snug">${escapeHtml(card.question)}</p>
+        <div class="space-y-2" id="trivia-options">
+          ${indexedOpts.map((opt, idx) => `
+            <button type="button" data-trivia-correct="${opt.isCorrect ? '1' : '0'}" class="w-full text-left p-3.5 rounded-xl border border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-50/40 transition flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full border border-slate-300 text-xs font-bold text-slate-600 flex items-center justify-center shrink-0">${String.fromCharCode(65 + idx)}</span>
+              <span class="text-sm text-slate-800">${escapeHtml(opt.text)}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div id="trivia-feedback" class="hidden"></div>
+      `;
+
+      triviaModalBody.querySelectorAll('button[data-trivia-correct]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (triviaAnsweredCurrent) return;
+          triviaAnsweredCurrent = true;
+          const isOk = btn.getAttribute('data-trivia-correct') === '1';
+          const s = loadFunStats();
+          s.triviaAnswered += 1;
+          if (isOk) s.triviaCorrect += 1;
+          saveFunStats(s);
+          triviaScoreText.textContent = `Kaffipásustig: ${s.triviaCorrect} / ${s.triviaAnswered}`;
+
+          triviaModalBody.querySelectorAll('button[data-trivia-correct]').forEach(b => {
+            b.disabled = true;
+            if (b.getAttribute('data-trivia-correct') === '1') {
+              b.className = 'w-full text-left p-3.5 rounded-xl border border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 flex items-center gap-3';
+            } else if (b === btn && !isOk) {
+              b.className = 'w-full text-left p-3.5 rounded-xl border border-rose-400 bg-rose-50 flex items-center gap-3';
+            }
+          });
+
+          const fb = document.getElementById('trivia-feedback');
+          fb.className = `p-3.5 rounded-xl border text-xs sm:text-sm animate-card ${isOk ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`;
+          fb.innerHTML = `<strong>${isOk ? 'Hárrétt!' : 'Ekki alveg!'}</strong> ${escapeHtml(card.fact)}`;
+        });
+      });
+    }
+
+    function openTriviaModal() {
+      currentTriviaIndex = Math.floor(Math.random() * TRIVIA_CARDS.length);
+      renderTriviaCard();
+      triviaModal.classList.remove('hidden');
+      triviaModal.classList.add('flex');
+    }
+
+    function closeTriviaModal() {
+      triviaModal.classList.add('hidden');
+      triviaModal.classList.remove('flex');
+    }
+
+    document.getElementById('open-trivia-btn').addEventListener('click', openTriviaModal);
+    document.getElementById('close-trivia-modal-btn').addEventListener('click', closeTriviaModal);
+    document.getElementById('close-trivia-footer-btn').addEventListener('click', closeTriviaModal);
+    document.getElementById('next-trivia-btn').addEventListener('click', () => {
+      currentTriviaIndex = (currentTriviaIndex + 1) % TRIVIA_CARDS.length;
+      renderTriviaCard();
+    });
+    triviaModal.addEventListener('click', (e) => {
+      if (e.target === triviaModal) closeTriviaModal();
+    });
+
+    // --- SMÁLEIKUR: VILLUVEIÐAR Á 20 SEKÚNDUM ---
+    const BUG_HUNT_SNIPPETS = [
+      {
+        title: 'Semíkommu-gildran',
+        lines: [
+          'int x = 3;',
+          'if (x > 10); {',
+          '    System.out.println("Stórt");',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: 'Semíkomman beint á eftir if (x > 10) lokar skilyrðinu of snemma, svo blokkin á eftir keyrir ALLTAF!'
+      },
+      {
+        title: 'Út fyrir mörk strengs',
+        lines: [
+          'String s = "Java";',
+          'for (int i = 0; i <= s.length(); i++) {',
+          '    System.out.println(s.charAt(i));',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: 'Lögleg sæti eru 0 til s.length() - 1. Með <= reynir lykkjan s.charAt(4) sem kastar StringIndexOutOfBoundsException.'
+      },
+      {
+        title: 'String-samanburður með ==',
+        lines: [
+          'String ord = sc.next();',
+          'if (ord == "Java") {',
+          '    System.out.println("Rétt!");',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: '== ber saman minnisvistföng en ekki textann! Nota á ord.equals("Java").'
+      },
+      {
+        title: 'Svigar á lengd fylkis',
+        lines: [
+          'int[] tolur = {2, 4, 6};',
+          'for (int i = 0; i < tolur.length(); i++) {',
+          '    System.out.println(tolur[i]);',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: 'Fylki nota tolur.length (án sviga), en strengir nota .length() með svigum.'
+      },
+      {
+        title: 'Breyta staki í for-each lykkju',
+        lines: [
+          'int[] a = {1, 2, 3};',
+          'for (int x : a) {',
+          '    x = x * 2;',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'Í for-each lykkju er x bara afrit af stakinu; x = x * 2; breytir EKKI fylkinu a! Til þess þarf venjulega for-lykkju með vísi i.'
+      },
+      {
+        title: 'Gildisveiting (=) í stað samanburðar (==)',
+        lines: [
+          'int stig = 10;',
+          'if (stig = 10) {',
+          '    System.out.println("Tíu");',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: 'Eitt = setur gildi í breytu (sem skilar int en ekki boolean). Nota þarf == til að bera saman.'
+      },
+      {
+        title: 'Heiltöludeiling í casting-gildru',
+        lines: [
+          'int a = 5, b = 2;',
+          'double svar = (double) (a / b);',
+          'System.out.println(svar);'
+        ],
+        bugLine: 1,
+        explanation: 'Sviginn (a / b) reiknast fyrst sem heiltöludeiling (= 2), svo svar verður 2.0 í stað 2.5. Rétt er (double) a / b.'
+      },
+      {
+        title: 'Endalaus while-lykkja',
+        lines: [
+          'int i = 1;',
+          'while (i <= 5) {',
+          '    System.out.println(i);',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'Það gleymdist að uppfæra teljarann (t.d. i++;) inni í lykkjunni, svo i helst alltaf 1 og lykkjan hættir aldrei!'
+      },
+      {
+        title: 'Óbreytanlegur strengur',
+        lines: [
+          'String s = "java";',
+          's.toUpperCase();',
+          'System.out.println(s);'
+        ],
+        bugLine: 1,
+        explanation: 'String er óbreytanlegur (immutable). s.toUpperCase() skilar nýjum streng en breytir ekki s nema þú skrifir s = s.toUpperCase();.'
+      },
+      {
+        title: 'Röð skilyrða í else if',
+        lines: [
+          'int einkunn = 95;',
+          'if (einkunn >= 50) System.out.println("Stóðst");',
+          'else if (einkunn >= 90) System.out.println("Ágætt");'
+        ],
+        bugLine: 1,
+        explanation: '95 >= 50 er strax satt, svo seinni greinin (>= 90) keyrir aldrei! Þrengsta skilyrðið verður að koma fyrst.'
+      },
+      {
+        title: 'Geyma void-aðferð í breytu',
+        lines: [
+          'public static void heilsa() { System.out.println("Hæ"); }',
+          'public static void main(String[] args) {',
+          '    String s = heilsa();',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'void-aðferð skilar engu gildi, svo það veldur þýðingarvillu að reyna að setja hana í breytu.'
+      },
+      {
+        title: 'Óupphafsstillt staðbundin breyta',
+        lines: [
+          'int summa;',
+          'for (int i = 1; i <= 5; i++) {',
+          '    summa += i;',
+          '}'
+        ],
+        bugLine: 0,
+        explanation: 'Staðbundin breyta verður að fá upphafsgildi (t.d. int summa = 0;) áður en hægt er að leggja við hana.'
+      }
+    ];
+
+    const bughuntModal = document.getElementById('bughunt-modal');
+    const bughuntBody = document.getElementById('bughunt-modal-body');
+    const bughuntTimerBadge = document.getElementById('bughunt-timer-badge');
+    const bughuntTimerBar = document.getElementById('bughunt-timer-bar');
+    const bughuntStatsText = document.getElementById('bughunt-stats-text');
+    const bughuntActionBtn = document.getElementById('bughunt-action-btn');
+
+    let bugHuntInterval = null;
+    let bugHuntTimeLeft = 20.0;
+    let bugHuntScore = 0;
+    let bugHuntIdx = 0;
+    let bugHuntSolved = false;
+    let bugHuntGameOver = false;
+
+    function stopBugHuntTimer() {
+      if (bugHuntInterval) {
+        clearInterval(bugHuntInterval);
+        bugHuntInterval = null;
+      }
+    }
+
+    function updateBugHuntStatsUi() {
+      const s = loadFunStats();
+      bughuntStatsText.textContent = `Stig í umferð: ${bugHuntScore} • Persónulegt met: ${s.bestBugHuntScore}`;
+    }
+
+    function renderBugHuntSnippet() {
+      stopBugHuntTimer();
+      bugHuntSolved = false;
+      bugHuntTimeLeft = 20.0;
+      bughuntTimerBadge.textContent = '20s';
+      bughuntTimerBadge.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-indigo-200 text-indigo-700';
+      bughuntTimerBar.style.width = '100%';
+      bughuntTimerBar.className = 'h-full bg-indigo-600 transition-all duration-100';
+      bughuntActionBtn.textContent = bugHuntGameOver ? 'Spila aftur' : 'Næsta þraut';
+      bughuntActionBtn.disabled = !bugHuntGameOver;
+      bughuntActionBtn.classList.toggle('opacity-50', !bugHuntGameOver);
+
+      const snip = BUG_HUNT_SNIPPETS[bugHuntIdx];
+      updateBugHuntStatsUi();
+
+      bughuntBody.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wide text-indigo-600">${escapeHtml(snip.title)}</span>
+          <span class="text-xs text-slate-500">Smelltu á línuna með villunni/gildrunni</span>
+        </div>
+        <div class="rounded-xl border border-slate-200 overflow-hidden bg-slate-900 text-slate-100 divide-y divide-slate-800">
+          ${snip.lines.map((line, i) => `
+            <button type="button" data-bug-line="${i}" class="w-full text-left px-4 py-2.5 flex items-start gap-3 hover:bg-slate-800/80 transition code-font text-xs sm:text-sm">
+              <span class="text-slate-500 select-none w-4 shrink-0 text-right">${i + 1}</span>
+              <code class="whitespace-pre-wrap break-all">${escapeHtml(line)}</code>
+            </button>
+          `).join('')}
+        </div>
+        <div id="bughunt-feedback" class="hidden"></div>
+      `;
+
+      bughuntBody.querySelectorAll('button[data-bug-line]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (bugHuntSolved || bugHuntGameOver) return;
+          const chosen = Number(btn.getAttribute('data-bug-line'));
+          finishBugHuntSnippet(chosen === snip.bugLine, chosen, false);
+        });
+      });
+
+      bugHuntInterval = setInterval(() => {
+        bugHuntTimeLeft = Math.max(0, bugHuntTimeLeft - 0.1);
+        const secs = Math.ceil(bugHuntTimeLeft);
+        bughuntTimerBadge.textContent = `${secs}s`;
+        bughuntTimerBar.style.width = `${(bugHuntTimeLeft / 20.0) * 100}%`;
+        if (secs <= 5) {
+          bughuntTimerBadge.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 border border-rose-300 text-rose-700';
+          bughuntTimerBar.className = 'h-full bg-rose-500 transition-all duration-100';
+        }
+        if (bugHuntTimeLeft <= 0) {
+          finishBugHuntSnippet(false, -1, true);
+        }
+      }, 100);
+    }
+
+    function finishBugHuntSnippet(isCorrect, chosenLine, timedOut) {
+      stopBugHuntTimer();
+      bugHuntSolved = true;
+      const snip = BUG_HUNT_SNIPPETS[bugHuntIdx];
+
+      bughuntBody.querySelectorAll('button[data-bug-line]').forEach(b => {
+        const idx = Number(b.getAttribute('data-bug-line'));
+        b.disabled = true;
+        if (idx === snip.bugLine) {
+          b.className = 'w-full text-left px-4 py-2.5 flex items-start gap-3 bg-emerald-900/50 text-emerald-200 code-font text-xs sm:text-sm';
+        } else if (idx === chosenLine && !isCorrect) {
+          b.className = 'w-full text-left px-4 py-2.5 flex items-start gap-3 bg-rose-900/50 text-rose-200 code-font text-xs sm:text-sm';
+        }
+      });
+
+      const s = loadFunStats();
+      if (isCorrect) {
+        bugHuntScore += 1;
+        if (bugHuntScore > s.bestBugHuntScore) {
+          s.bestBugHuntScore = bugHuntScore;
+          saveFunStats(s);
+        }
+        bugHuntGameOver = false;
+        bughuntActionBtn.textContent = 'Næsta þraut →';
+      } else {
+        bugHuntGameOver = true;
+        bughuntActionBtn.textContent = 'Spila aftur';
+      }
+      bughuntActionBtn.disabled = false;
+      bughuntActionBtn.classList.remove('opacity-50');
+      updateBugHuntStatsUi();
+
+      const fb = document.getElementById('bughunt-feedback');
+      fb.className = `p-3.5 rounded-xl border text-xs sm:text-sm animate-card ${isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`;
+      const headline = timedOut
+        ? 'Tíminn rann út!'
+        : (isCorrect ? 'Hárrétt! Þú fannst villuna!' : `Ekki alveg — villan er á línu ${snip.bugLine + 1}.`);
+      fb.innerHTML = `<strong>${headline}</strong> ${escapeHtml(snip.explanation)}`;
+    }
+
+    function startNewBugHuntRound() {
+      bugHuntScore = 0;
+      bugHuntGameOver = false;
+      bugHuntIdx = Math.floor(Math.random() * BUG_HUNT_SNIPPETS.length);
+      renderBugHuntSnippet();
+    }
+
+    function openBugHuntModal() {
+      startNewBugHuntRound();
+      bughuntModal.classList.remove('hidden');
+      bughuntModal.classList.add('flex');
+    }
+
+    function closeBugHuntModal() {
+      stopBugHuntTimer();
+      bughuntModal.classList.add('hidden');
+      bughuntModal.classList.remove('flex');
+    }
+
+    document.getElementById('open-bughunt-btn').addEventListener('click', openBugHuntModal);
+    document.getElementById('close-bughunt-modal-btn').addEventListener('click', closeBugHuntModal);
+    document.getElementById('close-bughunt-footer-btn').addEventListener('click', closeBugHuntModal);
+    bughuntActionBtn.addEventListener('click', () => {
+      if (bugHuntGameOver) {
+        startNewBugHuntRound();
+      } else {
+        bugHuntIdx = (bugHuntIdx + 1) % BUG_HUNT_SNIPPETS.length;
+        renderBugHuntSnippet();
+      }
+    });
+    bughuntModal.addEventListener('click', (e) => {
+      if (e.target === bughuntModal) closeBugHuntModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!triviaModal.classList.contains('hidden')) closeTriviaModal();
+        if (!bughuntModal.classList.contains('hidden')) closeBugHuntModal();
+      }
+    });
+
+    // Ræsa forritið og endurheimta vistaða framvindu
+    loadProgress();
+    render();
+  </script>
+</body>
+</html>
