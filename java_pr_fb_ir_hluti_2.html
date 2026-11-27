@@ -90,35 +90,38 @@
   <!-- EFSTA STIKA: Titill, framvindustika og kaflaval -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-2.5">
-      <!-- Hlutaskiptir (Part 1 / Part 2) -->
-      <div class="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-slate-100">
-        <nav class="inline-flex flex-wrap items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200" aria-label="Skipta um hluta">
-          <a href="index.html" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
+      <!-- Hlutaskiptir og smáleikir -->
+      <div class="flex flex-wrap md:flex-nowrap items-center justify-between gap-2 mb-2.5 pb-2 border-b border-slate-100">
+        <nav class="inline-flex flex-wrap sm:flex-nowrap items-center p-0.5 rounded-xl bg-slate-100 border border-slate-200 shrink-0" aria-label="Skipta um hluta">
+          <a href="index.html" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
             ← Forsíða
           </a>
-          <a href="java_pr_fb_ir_hluti_1.html" class="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
-            Hluti 1: Grunnur &amp; Lykkjur
+          <a href="java_pr_fb_ir_hluti_1.html" title="Hluti 1: Grunnur &amp; Lykkjur" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
+            Hluti 1
           </a>
-          <a href="java_pr_fb_ir_hluti_2.html" aria-current="page" class="px-3 py-1 rounded-lg text-xs font-semibold bg-white text-blue-700 shadow-xs transition">
-            Hluti 2: Aðferðir &amp; Fylki
+          <a href="java_pr_fb_ir_hluti_2.html" aria-current="page" title="Hluti 2: Aðferðir &amp; Fylki" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-blue-700 shadow-xs transition whitespace-nowrap">
+            Hluti 2
           </a>
-          <a href="java_pr_fb_ir_hluti_3.html" class="px-3 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition">
-            Hluti 3: OOP &amp; Undantekningar
+          <a href="java_pr_fb_ir_hluti_3.html" title="Hluti 3: OOP &amp; Undantekningar" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
+            Hluti 3
           </a>
         </nav>
-        <div class="flex items-center gap-1.5">
-          <button id="open-trivia-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition inline-flex items-center gap-1" title="Kaffipása: Léttar spurningar úr dægurmenningu, íþróttum og fleiru">
+        <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5 shrink-0">
+          <button id="open-trivia-btn" type="button" class="h-7 px-2.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition inline-flex items-center gap-1 whitespace-nowrap" title="Kaffipása: Léttar spurningar úr dægurmenningu, íþróttum og fleiru">
             <span>☕</span>
             <span>Kaffipása</span>
           </button>
-          <button id="open-bughunt-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition inline-flex items-center gap-1" title="Smáleikur: Finndu villuna á 20 sekúndum">
+          <button id="open-bughunt-btn" type="button" class="h-7 px-2.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition inline-flex items-center gap-1 whitespace-nowrap" title="Smáleikur: Finndu villuna á 20 sekúndum">
             <span>🐛</span>
-            <span class="hidden sm:inline">Smáleikur:</span>
             <span>Villuveiðar</span>
           </button>
-          <button id="open-tip-btn" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition inline-flex items-center gap-1" title="Hvatning og prófráð">
+          <button id="open-tip-btn" type="button" class="h-7 px-2.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition inline-flex items-center gap-1 whitespace-nowrap" title="Hvatning og prófráð">
             <span>💡</span>
             <span>Heilráð</span>
+          </button>
+          <button id="open-chess-btn" type="button" class="h-7 px-2.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300 hover:bg-slate-200 transition inline-flex items-center gap-1 whitespace-nowrap" title="Skák: Þú færð 1 leik í hvert sinn sem þú leysir nýtt Java-dæmi rétt">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3c0 1.12.61 2.09 1.52 2.61L9.5 10H8a1 1 0 0 0 0 2h1.08l-.9 5H6a1 1 0 0 0 0 2h12a1 1 0 1 0 0-2h-2.18l-.9-5H16a1 1 0 1 0 0-2h-1.5l-1.02-2.39A2.99 2.99 0 0 0 15 5a3 3 0 0 0-3-3Zm-4 19a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/></svg>
+            <span id="header-chess-label">Skák (1 leikur)</span>
           </button>
         </div>
       </div>
@@ -159,7 +162,7 @@
       </div>
 
       <!-- 5 kaflahnappar -->
-      <nav id="chapter-nav" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" aria-label="Kaflayfirlit">
+      <nav id="chapter-nav" class="flex flex-wrap items-center gap-1.5 pb-0.5" aria-label="Kaflayfirlit">
         <!-- Fyllt út með JavaScript -->
       </nav>
     </div>
@@ -293,6 +296,44 @@
             Loka
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Skák - 1 leikur á hvert dæmi -->
+  <div id="chess-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="chess-modal-title">
+    <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-card max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-slate-800 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3c0 1.12.61 2.09 1.52 2.61L9.5 10H8a1 1 0 0 0 0 2h1.08l-.9 5H6a1 1 0 0 0 0 2h12a1 1 0 1 0 0-2h-2.18l-.9-5H16a1 1 0 1 0 0-2h-1.5l-1.02-2.39A2.99 2.99 0 0 0 15 5a3 3 0 0 0-3-3Zm-4 19a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/></svg>
+          <div>
+            <h2 id="chess-modal-title" class="text-base font-bold text-slate-900 leading-tight">Skák</h2>
+            <p class="text-[11px] text-slate-500">1 leikur fyrir hvert nýtt rétt Java-dæmi</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="chess-credits-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 border border-blue-200 text-blue-700">Inneign: 1 leikur</span>
+          <button id="close-chess-modal-btn" type="button" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition" aria-label="Loka glugga">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-3">
+        <div id="chess-status-banner" class="p-2.5 rounded-xl border text-xs sm:text-sm font-medium"></div>
+        <div id="chess-board" class="grid grid-cols-8 w-full max-w-[340px] mx-auto aspect-square border-2 border-slate-700 rounded-lg overflow-hidden shadow-sm select-none"></div>
+        <p class="text-[11px] text-slate-500 text-center">Þú leikur með hvítu (neðst). Smelltu á taflmann og svo á löglegan reit.</p>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+        <button id="chess-new-game-btn" type="button" class="px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-100 transition">
+          Ný skák
+        </button>
+        <button id="close-chess-footer-btn" type="button" class="px-4 py-1.5 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition">
+          Aftur í námið
+        </button>
       </div>
     </div>
   </div>
@@ -7575,7 +7616,10 @@ System.out.println(tel);`,
       confettiRafId = requestAnimationFrame(frame);
     }
 
-    function recordAnswerOutcome(q, ok) {
+    function recordAnswerOutcome(q, ok, wasCompleted = false) {
+      if (ok && !wasCompleted) {
+        awardChessMoveCredit();
+      }
       let milestone = null;
       if (ok) {
         if (state.lastStreakQuestionId !== q.id) {
@@ -7599,6 +7643,7 @@ System.out.println(tel);`,
     }
 
     function handleCheckAnswer(q) {
+      const wasCompleted = state.completedQuestions.has(q.id);
       if (q.type === 'mcq') {
         if (!state.selectedOption) {
           state.feedback = {
@@ -7616,7 +7661,7 @@ System.out.println(tel);`,
         } else {
           state.mistakeQuestions.add(q.id);
         }
-        const milestone = recordAnswerOutcome(q, ok);
+        const milestone = recordAnswerOutcome(q, ok, wasCompleted);
         state.feedback = {
           ok,
           html: ok
@@ -7643,7 +7688,7 @@ System.out.println(tel);`,
         state.attemptedQuestions.add(q.id);
         const normalized = val.replace(/\s+/g, ' ');
         const ok = q.acceptedAnswers.some(ans => ans.trim().toLowerCase() === normalized.toLowerCase());
-        const milestone = recordAnswerOutcome(q, ok);
+        const milestone = recordAnswerOutcome(q, ok, wasCompleted);
         if (ok) {
           state.completedQuestions.add(q.id);
           state.feedback = { ok: true, html: q.explanation, showTrace: true, milestone };
@@ -7676,7 +7721,7 @@ System.out.println(tel);`,
           inp.accepted.some(acc => acc === values[idx])
         );
         const ok = results.every(Boolean);
-        const milestone = recordAnswerOutcome(q, ok);
+        const milestone = recordAnswerOutcome(q, ok, wasCompleted);
         if (ok) {
           state.completedQuestions.add(q.id);
           state.feedback = { ok: true, html: q.explanation, showTrace: true, milestone };
@@ -7717,7 +7762,7 @@ System.out.println(tel);`,
         state.savedInputs[q.id] = values;
         state.attemptedQuestions.add(q.id);
         const ok = q.blanks.every((b, idx) => b.accepted.includes(values[idx]));
-        const milestone = recordAnswerOutcome(q, ok);
+        const milestone = recordAnswerOutcome(q, ok, wasCompleted);
         if (ok) {
           state.completedQuestions.add(q.id);
           state.feedback = { ok: true, html: q.explanation, milestone };
@@ -8723,10 +8768,509 @@ for (int r = 0; r < m.length; r++) {
       if (e.key === 'Escape') {
         if (!triviaModal.classList.contains('hidden')) closeTriviaModal();
         if (!bughuntModal.classList.contains('hidden')) closeBugHuntModal();
+        const cm = document.getElementById('chess-modal'); if (cm && !cm.classList.contains('hidden')) closeChessModal();
       }
     });
 
     // Ræsa forritið og endurheimta vistaða framvindu
+
+    // --- SKÁK (1 LEIKUR Á HVERT RÉTT DÆMI) ---
+    const CHESS_STORAGE_KEY = 'java_profbudir_chess_v1';
+    function renderChessPieceSvg(piece) {
+      if (!piece) return '';
+      const isW = piece === piece.toUpperCase();
+      const fill = isW ? '#FFFFFF' : '#1E293B';
+      const stroke = '#0F172A';
+      const inner = isW ? '#0F172A' : '#E2E8F0';
+      const type = piece.toLowerCase();
+      let shapes = '';
+
+      if (type === 'p') {
+        shapes = `
+          <circle cx="22.5" cy="13.5" r="5.2" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+          <path d="M16 20.5c0-2.4 2.9-4 6.5-4s6.5 1.6 6.5 4c0 1.5-1.2 2.6-2.5 3.1l2.8 8.9H15.7l2.8-8.9c-1.3-.5-2.5-1.6-2.5-3.1z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="11.5" y="33.5" width="22" height="4.5" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+        `;
+      } else if (type === 'r') {
+        shapes = `
+          <path d="M12 9h4v3h3.5V9h6v3H29V9h4v6.5l-3 2.5v13l3 3v3.5H12V34l3-3V18l-3-2.5V9z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="15" y1="18" x2="30" y2="18" stroke="${inner}" stroke-width="1.6"/>
+          <line x1="14.5" y1="31" x2="30.5" y2="31" stroke="${inner}" stroke-width="1.6"/>
+        `;
+      } else if (type === 'n') {
+        shapes = `
+          <path d="M14.5 36.5v-3.5c0-3 3.5-6.5 5.5-9.5-2.5.4-5.2 1.2-7 2.2-1.8.9-3.2-.6-2.3-2.4 1.5-3.1 4.2-6.5 6.8-8.6l-.5-4.2 3.8 2.3c2.4-.7 5.2-.5 7.4.6 3.7 1.8 5.8 5.6 5.8 10.6 0 4.6-1.5 9-3.2 12.5H14.5z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="19" cy="16.5" r="1.3" fill="${inner}"/>
+          <rect x="12" y="36" width="21" height="3.5" rx="1.5" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+        `;
+      } else if (type === 'b') {
+        shapes = `
+          <circle cx="22.5" cy="8.5" r="2.6" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>
+          <path d="M22.5 11.5c-5.2 3.5-7.8 8.3-6.4 13.3.7 2.4 2.2 4 3.4 5.2l-3.5 4.5h13l-3.5-4.5c1.2-1.2 2.7-2.8 3.4-5.2 1.4-5-1.2-9.8-6.4-13.3z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M19.5 19.5l6 6M25.5 19.5l-6 6" stroke="${inner}" stroke-width="1.7" stroke-linecap="round"/>
+          <rect x="11.5" y="34" width="22" height="4.2" rx="1.8" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+        `;
+      } else if (type === 'q') {
+        shapes = `
+          <circle cx="9.5" cy="13" r="2.1" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <circle cx="16" cy="10.5" r="2.1" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <circle cx="22.5" cy="9.5" r="2.2" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <circle cx="29" cy="10.5" r="2.1" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <circle cx="35.5" cy="13" r="2.1" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <path d="M10.5 15.2l4.8 11.3L17 13l5.5 13 5.5-13 1.7 13.5 4.8-11.3-3.2 17.8H13.7l-3.2-17.8z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="12" y="33.5" width="21" height="4.5" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+        `;
+      } else if (type === 'k') {
+        shapes = `
+          <path d="M22.5 6.5v6M19.5 9.5h6" stroke="${stroke}" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M15.5 18.5c0-3.5 3.2-5.5 7-5.5s7 2 7 5.5c0 2.5-1.5 4.7-3 6.5l3.5 8h-15l3.5-8c-1.5-1.8-3-4-3-6.5z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M14.5 28.5h16" stroke="${inner}" stroke-width="1.6" stroke-linecap="round"/>
+          <rect x="11.5" y="33.5" width="22" height="4.5" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+        `;
+      }
+
+      return `<svg class="w-8 h-8 sm:w-9 sm:h-9 pointer-events-none drop-shadow-[0_1px_1px_rgba(15,23,42,0.28)]" viewBox="0 0 45 45" aria-hidden="true">${shapes}</svg>`;
+    }
+    const CHESS_PIECE_VALUES = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+
+    function createInitialChessBoard() {
+      return [
+        ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+        ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+      ];
+    }
+
+    function createDefaultChessState() {
+      return {
+        credits: 1,
+        board: createInitialChessBoard(),
+        turn: 'w',
+        status: 'playing',
+        lastMove: null,
+        moveCount: 0
+      };
+    }
+
+    function loadChessState() {
+      try {
+        const raw = localStorage.getItem(CHESS_STORAGE_KEY);
+        if (!raw) return createDefaultChessState();
+        const d = JSON.parse(raw);
+        if (!d || !Array.isArray(d.board) || d.board.length !== 8) return createDefaultChessState();
+        return {
+          credits: typeof d.credits === 'number' && d.credits >= 0 ? d.credits : 1,
+          board: d.board.map(row => Array.isArray(row) && row.length === 8 ? row.slice() : Array(8).fill(null)),
+          turn: d.turn === 'b' ? 'b' : 'w',
+          status: ['playing', 'checkmate_w', 'checkmate_b', 'stalemate'].includes(d.status) ? d.status : 'playing',
+          lastMove: d.lastMove || null,
+          moveCount: Number(d.moveCount) || 0
+        };
+      } catch (e) {
+        return createDefaultChessState();
+      }
+    }
+
+    let chessState = loadChessState();
+    let chessSelected = null;
+    let chessLegalTargets = [];
+    let chessAiThinking = false;
+
+    function saveChessState() {
+      try {
+        localStorage.setItem(CHESS_STORAGE_KEY, JSON.stringify(chessState));
+      } catch (e) {}
+    }
+
+    function formatCreditLabel(n) {
+      return n === 1 ? '1 leikur' : `${n} leikir`;
+    }
+
+    function updateChessHeaderBadge() {
+      const lbl = document.getElementById('header-chess-label');
+      if (lbl) lbl.textContent = `Skák (${formatCreditLabel(chessState.credits)})`;
+      const badge = document.getElementById('chess-credits-badge');
+      if (badge) badge.textContent = `Inneign: ${formatCreditLabel(chessState.credits)}`;
+    }
+
+    function awardChessMoveCredit() {
+      chessState.credits += 1;
+      saveChessState();
+      updateChessHeaderBadge();
+    }
+
+    function isChessWhite(p) { return p !== null && p === p.toUpperCase(); }
+    function isChessBlack(p) { return p !== null && p === p.toLowerCase(); }
+    function isChessSide(p, side) { return side === 'w' ? isChessWhite(p) : isChessBlack(p); }
+    function inBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
+
+    function cloneChessBoard(b) {
+      return b.map(row => row.slice());
+    }
+
+    function pseudoLegalMoves(board, r, c) {
+      const p = board[r][c];
+      if (!p) return [];
+      const side = isChessWhite(p) ? 'w' : 'b';
+      const type = p.toLowerCase();
+      const moves = [];
+
+      if (type === 'p') {
+        const dir = side === 'w' ? -1 : 1;
+        const startRow = side === 'w' ? 6 : 1;
+        if (inBounds(r + dir, c) && board[r + dir][c] === null) {
+          moves.push([r + dir, c]);
+          if (r === startRow && board[r + 2 * dir][c] === null) {
+            moves.push([r + 2 * dir, c]);
+          }
+        }
+        for (const dc of [-1, 1]) {
+          const nr = r + dir, nc = c + dc;
+          if (inBounds(nr, nc) && board[nr][nc] !== null && !isChessSide(board[nr][nc], side)) {
+            moves.push([nr, nc]);
+          }
+        }
+        return moves;
+      }
+
+      if (type === 'n') {
+        for (const [dr, dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) {
+          const nr = r + dr, nc = c + dc;
+          if (inBounds(nr, nc) && !isChessSide(board[nr][nc], side)) moves.push([nr, nc]);
+        }
+        return moves;
+      }
+
+      if (type === 'k') {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr, nc = c + dc;
+            if (inBounds(nr, nc) && !isChessSide(board[nr][nc], side)) moves.push([nr, nc]);
+          }
+        }
+        return moves;
+      }
+
+      const dirs = [];
+      if (type === 'b' || type === 'q') dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+      if (type === 'r' || type === 'q') dirs.push([-1,0],[1,0],[0,-1],[0,1]);
+      for (const [dr, dc] of dirs) {
+        let nr = r + dr, nc = c + dc;
+        while (inBounds(nr, nc)) {
+          if (board[nr][nc] === null) {
+            moves.push([nr, nc]);
+          } else {
+            if (!isChessSide(board[nr][nc], side)) moves.push([nr, nc]);
+            break;
+          }
+          nr += dr;
+          nc += dc;
+        }
+      }
+      return moves;
+    }
+
+    function isSquareAttacked(board, tr, tc, bySide) {
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (!p || !isChessSide(p, bySide)) continue;
+          if (p.toLowerCase() === 'p') {
+            const dir = bySide === 'w' ? -1 : 1;
+            if (r + dir === tr && (c - 1 === tc || c + 1 === tc)) return true;
+          } else {
+            const pm = pseudoLegalMoves(board, r, c);
+            if (pm.some(([mr, mc]) => mr === tr && mc === tc)) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function isKingInCheck(board, side) {
+      const targetKing = side === 'w' ? 'K' : 'k';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (board[r][c] === targetKing) {
+            return isSquareAttacked(board, r, c, side === 'w' ? 'b' : 'w');
+          }
+        }
+      }
+      return false;
+    }
+
+    function applyMoveOnBoard(board, fromR, fromC, toR, toC) {
+      const next = cloneChessBoard(board);
+      let piece = next[fromR][fromC];
+      if (piece === 'P' && toR === 0) piece = 'Q';
+      else if (piece === 'p' && toR === 7) piece = 'q';
+      next[toR][toC] = piece;
+      next[fromR][fromC] = null;
+      return next;
+    }
+
+    function legalMovesForSquare(board, r, c) {
+      const p = board[r][c];
+      if (!p) return [];
+      const side = isChessWhite(p) ? 'w' : 'b';
+      return pseudoLegalMoves(board, r, c).filter(([tr, tc]) => {
+        const nextBoard = applyMoveOnBoard(board, r, c, tr, tc);
+        return !isKingInCheck(nextBoard, side);
+      });
+    }
+
+    function getAllLegalMoves(board, side) {
+      const all = [];
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (isChessSide(board[r][c], side)) {
+            const targets = legalMovesForSquare(board, r, c);
+            for (const [tr, tc] of targets) {
+              all.push({ from: [r, c], to: [tr, tc] });
+            }
+          }
+        }
+      }
+      return all;
+    }
+
+    function chooseBlackMove(board) {
+      const moves = getAllLegalMoves(board, 'b');
+      if (moves.length === 0) return null;
+      let bestMove = moves[0];
+      let bestScore = -Infinity;
+
+      for (const m of moves) {
+        const [fr, fc] = m.from;
+        const [tr, tc] = m.to;
+        const attacker = board[fr][fc];
+        const victim = board[tr][tc];
+        const next = applyMoveOnBoard(board, fr, fc, tr, tc);
+
+        let score = Math.random() * 6;
+        if (victim) {
+          score += CHESS_PIECE_VALUES[victim.toLowerCase()] - CHESS_PIECE_VALUES[attacker.toLowerCase()] * 0.1;
+        }
+        if (attacker === 'p' && tr === 7) score += 800;
+        if (tr >= 3 && tr <= 4 && tc >= 3 && tc <= 4) score += 22;
+        else if (tr >= 2 && tr <= 5 && tc >= 2 && tc <= 5) score += 10;
+
+        if (isKingInCheck(next, 'w')) {
+          score += 65;
+          if (getAllLegalMoves(next, 'w').length === 0) score += 100000;
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = m;
+        }
+      }
+      return bestMove;
+    }
+
+    function updateChessStatusAfterMove(nextSide) {
+      const legal = getAllLegalMoves(chessState.board, nextSide);
+      if (legal.length === 0) {
+        if (isKingInCheck(chessState.board, nextSide)) {
+          chessState.status = nextSide === 'b' ? 'checkmate_w' : 'checkmate_b';
+        } else {
+          chessState.status = 'stalemate';
+        }
+      } else {
+        chessState.status = 'playing';
+      }
+    }
+
+    function renderChessModal() {
+      updateChessHeaderBadge();
+      const boardEl = document.getElementById('chess-board');
+      const statusEl = document.getElementById('chess-status-banner');
+      if (!boardEl || !statusEl) return;
+
+      const whiteInCheck = chessState.status === 'playing' && isKingInCheck(chessState.board, 'w');
+      if (chessState.status === 'checkmate_w') {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-semibold bg-emerald-50 border-emerald-200 text-emerald-900';
+        statusEl.textContent = '🏆 Skák og mát! Þú vannst skákina! Smelltu á „Ný skák“ til að spila aftur.';
+      } else if (chessState.status === 'checkmate_b') {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-semibold bg-rose-50 border-rose-200 text-rose-900';
+        statusEl.textContent = 'Skák og mát — svarti kóngurinn vann í þetta sinn. Smelltu á „Ný skák“!';
+      } else if (chessState.status === 'stalemate') {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-semibold bg-slate-100 border-slate-300 text-slate-800';
+        statusEl.textContent = 'Pattstaða (jafntefli)! Smelltu á „Ný skák“ til að byrja upp á nýtt.';
+      } else if (chessAiThinking || chessState.turn === 'b') {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-indigo-50 border-indigo-200 text-indigo-900';
+        statusEl.textContent = 'Svartur hugsar sinn leik...';
+      } else if (chessState.credits <= 0) {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-amber-50 border-amber-200 text-amber-900';
+        statusEl.textContent = '🔒 Leystu næsta Java-dæmi til að vinna þér inn næsta leik!';
+      } else {
+        statusEl.className = 'p-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-blue-50 border-blue-200 text-blue-900';
+        statusEl.textContent = whiteInCheck
+          ? '⚠️ Kóngurinn þinn er í skák! Veldu löglegan leik til að verjast.'
+          : `Þú átt leik! Þú átt ${formatCreditLabel(chessState.credits)} í inneign.`;
+      }
+
+      const canPlayWhite = chessState.status === 'playing' && chessState.turn === 'w' && !chessAiThinking && chessState.credits > 0;
+      let html = '';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const piece = chessState.board[r][c];
+          const isLight = (r + c) % 2 === 0;
+          const isSel = chessSelected && chessSelected[0] === r && chessSelected[1] === c;
+          const isTarget = chessLegalTargets.some(([tr, tc]) => tr === r && tc === c);
+          const isLast = chessState.lastMove && ((chessState.lastMove.from[0] === r && chessState.lastMove.from[1] === c) || (chessState.lastMove.to[0] === r && chessState.lastMove.to[1] === c));
+
+          let bgClass = isLight ? 'bg-amber-50' : 'bg-amber-700/75';
+          if (isLast) bgClass = isLight ? 'bg-yellow-100' : 'bg-amber-600';
+          if (isSel) bgClass = 'bg-blue-300';
+
+          const pieceSpan = piece ? renderChessPieceSvg(piece) : '';
+
+          const targetMarker = isTarget
+            ? (piece
+                ? '<span class="absolute inset-0.5 rounded-full border-2 border-emerald-500 pointer-events-none"></span>'
+                : '<span class="w-3 h-3 rounded-full bg-emerald-500/80 pointer-events-none"></span>')
+            : '';
+
+          html += `
+            <button type="button" data-chess-r="${r}" data-chess-c="${c}" ${!canPlayWhite ? 'disabled' : ''} class="relative flex items-center justify-center aspect-square ${bgClass} ${canPlayWhite ? 'hover:brightness-95 cursor-pointer' : 'cursor-default'} transition">
+              ${pieceSpan}
+              ${targetMarker}
+            </button>
+          `;
+        }
+      }
+      boardEl.innerHTML = html;
+
+      if (canPlayWhite) {
+        boardEl.querySelectorAll('button[data-chess-r]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const r = Number(btn.getAttribute('data-chess-r'));
+            const c = Number(btn.getAttribute('data-chess-c'));
+            handleChessSquareClick(r, c);
+          });
+        });
+      }
+    }
+
+    function handleChessSquareClick(r, c) {
+      if (chessState.status !== 'playing' || chessState.turn !== 'w' || chessAiThinking || chessState.credits <= 0) return;
+
+      const isTarget = chessLegalTargets.some(([tr, tc]) => tr === r && tc === c);
+      if (chessSelected && isTarget) {
+        const [fr, fc] = chessSelected;
+        chessState.board = applyMoveOnBoard(chessState.board, fr, fc, r, c);
+        chessState.lastMove = { from: [fr, fc], to: [r, c] };
+        chessState.credits = Math.max(0, chessState.credits - 1);
+        chessState.moveCount += 1;
+        chessSelected = null;
+        chessLegalTargets = [];
+
+        updateChessStatusAfterMove('b');
+        if (chessState.status === 'playing') {
+          chessState.turn = 'b';
+          chessAiThinking = true;
+          saveChessState();
+          renderChessModal();
+
+          setTimeout(() => {
+            const aiMove = chooseBlackMove(chessState.board);
+            if (aiMove) {
+              const [afr, afc] = aiMove.from;
+              const [atr, atc] = aiMove.to;
+              chessState.board = applyMoveOnBoard(chessState.board, afr, afc, atr, atc);
+              chessState.lastMove = { from: [afr, afc], to: [atr, atc] };
+              chessState.turn = 'w';
+              updateChessStatusAfterMove('w');
+            } else {
+              updateChessStatusAfterMove('b');
+            }
+            chessAiThinking = false;
+            saveChessState();
+            renderChessModal();
+          }, 350);
+        } else {
+          saveChessState();
+          renderChessModal();
+        }
+        return;
+      }
+
+      const piece = chessState.board[r][c];
+      if (isChessWhite(piece)) {
+        if (chessSelected && chessSelected[0] === r && chessSelected[1] === c) {
+          chessSelected = null;
+          chessLegalTargets = [];
+        } else {
+          chessSelected = [r, c];
+          chessLegalTargets = legalMovesForSquare(chessState.board, r, c);
+        }
+        renderChessModal();
+      } else {
+        chessSelected = null;
+        chessLegalTargets = [];
+        renderChessModal();
+      }
+    }
+
+    function openChessModal() {
+      chessSelected = null;
+      chessLegalTargets = [];
+      if (chessState.status === 'playing' && chessState.turn === 'b' && !chessAiThinking) {
+        chessAiThinking = true;
+        renderChessModal();
+        setTimeout(() => {
+          const aiMove = chooseBlackMove(chessState.board);
+          if (aiMove) {
+            chessState.board = applyMoveOnBoard(chessState.board, aiMove.from[0], aiMove.from[1], aiMove.to[0], aiMove.to[1]);
+            chessState.lastMove = aiMove;
+            chessState.turn = 'w';
+            updateChessStatusAfterMove('w');
+          }
+          chessAiThinking = false;
+          saveChessState();
+          renderChessModal();
+        }, 350);
+      } else {
+        renderChessModal();
+      }
+      const m = document.getElementById('chess-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeChessModal() {
+      const m = document.getElementById('chess-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+
+    updateChessHeaderBadge();
+    document.getElementById('open-chess-btn').addEventListener('click', openChessModal);
+    document.getElementById('close-chess-modal-btn').addEventListener('click', closeChessModal);
+    document.getElementById('close-chess-footer-btn').addEventListener('click', closeChessModal);
+    document.getElementById('chess-new-game-btn').addEventListener('click', () => {
+      if (chessAiThinking) return;
+      chessState.board = createInitialChessBoard();
+      chessState.turn = 'w';
+      chessState.status = 'playing';
+      chessState.lastMove = null;
+      chessState.moveCount = 0;
+      chessSelected = null;
+      chessLegalTargets = [];
+      saveChessState();
+      renderChessModal();
+    });
+    document.getElementById('chess-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('chess-modal')) closeChessModal();
+    });
+
     loadProgress();
     render();
   </script>
